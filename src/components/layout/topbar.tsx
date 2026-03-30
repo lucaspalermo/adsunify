@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import { Menu, Search, Bell } from "lucide-react";
+import { Menu, Search, Bell, Globe, ChevronDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar-store";
+import { useSiteStore } from "@/stores/site-store";
+import { useUserId } from "@/hooks/use-user-id";
 import { NotificationHub } from "./notification-hub";
 import { ThemeToggleCompact } from "@/components/ui/theme-toggle";
 
@@ -70,6 +72,137 @@ function getFirstName(name: string): string {
   return name.split(" ")[0];
 }
 
+function SiteSelector() {
+  const userId = useUserId();
+  const { sites, activeSiteId, setSites, setActiveSite } = useSiteStore();
+  const [open, setOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [newUrl, setNewUrl] = useState("");
+  const [newName, setNewName] = useState("");
+
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`/api/sites?userId=${userId}`)
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setSites(data); })
+      .catch(() => {});
+  }, [userId, setSites]);
+
+  const active = sites.find((s) => s.id === activeSiteId) || sites[0];
+
+  async function addSite() {
+    if (!newUrl.trim() || !userId) return;
+    try {
+      const res = await fetch("/api/sites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, url: newUrl.trim(), name: newName.trim() || newUrl.trim() }),
+      });
+      const site = await res.json();
+      if (site.id) {
+        setSites([...sites, site]);
+        setNewUrl("");
+        setNewName("");
+        setAdding(false);
+      }
+    } catch {}
+  }
+
+  if (sites.length === 0) return null;
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className={cn(
+          "flex items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors",
+          "border-slate-200 bg-white hover:bg-slate-50",
+          "dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
+        )}
+      >
+        <Globe className="h-3.5 w-3.5 text-indigo-500" />
+        <span className="max-w-[120px] truncate text-slate-700 dark:text-zinc-300 font-medium">
+          {active?.name || "Selecionar site"}
+        </span>
+        {active?.lastScore !== undefined && active.lastScore !== null && (
+          <span className={cn(
+            "rounded-full px-1.5 py-0.5 text-[10px] font-bold",
+            (active.lastScore ?? 0) >= 70 ? "bg-green-500/10 text-green-500" :
+            (active.lastScore ?? 0) >= 40 ? "bg-amber-500/10 text-amber-500" :
+            "bg-red-500/10 text-red-500"
+          )}>
+            {active.lastScore}
+          </span>
+        )}
+        <ChevronDown className="h-3 w-3 text-slate-400" />
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => { setOpen(false); setAdding(false); }} />
+          <div className="absolute left-0 top-full z-50 mt-1 w-72 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-zinc-700 dark:bg-zinc-800">
+            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+              Seus Sites
+            </p>
+            {sites.map((site) => (
+              <button
+                key={site.id}
+                onClick={() => { setActiveSite(site.id); setOpen(false);
+                  fetch("/api/sites", { method: "PATCH", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ siteId: site.id, userId, action: "set-primary" }) });
+                }}
+                className={cn(
+                  "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
+                  site.id === activeSiteId
+                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400"
+                    : "text-slate-700 hover:bg-slate-50 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                )}
+              >
+                <Globe className="h-3.5 w-3.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{site.name}</p>
+                  <p className="text-[11px] text-slate-400 dark:text-zinc-500 truncate">{site.url}</p>
+                </div>
+                {site.lastScore !== undefined && site.lastScore !== null && (
+                  <span className="text-[11px] font-bold text-slate-400">{site.lastScore}</span>
+                )}
+              </button>
+            ))}
+
+            {/* Add new site */}
+            {!adding ? (
+              <button
+                onClick={() => setAdding(true)}
+                className="mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" /> Adicionar outro site
+              </button>
+            ) : (
+              <div className="mt-2 space-y-2 border-t border-slate-100 dark:border-zinc-700 pt-2">
+                <input
+                  type="text" placeholder="URL do site" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} autoFocus
+                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-zinc-600 bg-slate-50 dark:bg-zinc-700 px-3 text-xs text-slate-900 dark:text-zinc-100 outline-none focus:border-indigo-500/50"
+                />
+                <input
+                  type="text" placeholder="Nome (opcional)" value={newName} onChange={(e) => setNewName(e.target.value)}
+                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-zinc-600 bg-slate-50 dark:bg-zinc-700 px-3 text-xs text-slate-900 dark:text-zinc-100 outline-none focus:border-indigo-500/50"
+                />
+                <button
+                  onClick={addSite}
+                  disabled={!newUrl.trim()}
+                  className="w-full rounded-lg bg-indigo-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-600 disabled:opacity-50 transition-colors"
+                >
+                  Adicionar
+                </button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function Topbar() {
   const { isCollapsed, toggle } = useSidebarStore();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -99,11 +232,7 @@ export function Topbar() {
         >
           <Menu className="h-5 w-5" />
         </button>
-        {session && (
-          <span className="hidden sm:block text-sm text-slate-600 dark:text-zinc-400">
-            Ola, <span className="text-slate-900 font-medium dark:text-zinc-100">{firstName}</span>!
-          </span>
-        )}
+        <SiteSelector />
       </div>
 
       {/* Center: search bar */}
