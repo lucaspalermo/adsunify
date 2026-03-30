@@ -1,192 +1,155 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import {
-  Heart,
-  MessageCircle,
-  Send,
-  Trophy,
-  Tag,
-  Crown,
-  Medal,
-  Award,
-} from "lucide-react"
+import { Heart, MessageCircle, Send, Trophy, Tag, Loader2, Plus, User } from "lucide-react"
 import { GlassCard } from "@/components/shared/glass-card"
 import { GradientText } from "@/components/shared/gradient-text"
 import { GlowButton } from "@/components/shared/glow-button"
+import { useUserId } from "@/hooks/use-user-id"
+import { cn } from "@/lib/utils"
 
-const sectionVariants = {
-  hidden: { opacity: 0, y: 24 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" as const, delay: i * 0.12 },
-  }),
+interface Post {
+  id: string
+  title: string
+  body: string
+  category: string
+  likes: number
+  commentCount: number
+  createdAt: string
+  author: { name: string; level: number }
 }
 
-const posts: {
-  id: number
-  avatar: string
+interface RankUser {
+  id: string
   name: string
-  level: number
-  content: string
-  likes: number
-  comments: number
-  time: string
-  color: string
-}[] = []
-
-const ranking: {
-  name: string
-  level: number
   xp: number
-  medal: string | null
-}[] = []
+  level: number
+}
 
-const categories = ["Cases", "Dúvidas", "Dicas", "Celebrações"]
+const categories = ["Todos", "Cases", "Duvidas", "Dicas", "Celebracoes"]
 
 export default function ComunidadePage() {
-  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set())
+  const userId = useUserId()
+  const [posts, setPosts] = useState<Post[]>([])
+  const [ranking, setRanking] = useState<RankUser[]>([])
+  const [loading, setLoading] = useState(true)
+  const [category, setCategory] = useState("Todos")
+  const [newPost, setNewPost] = useState("")
+  const [newTitle, setNewTitle] = useState("")
+  const [showForm, setShowForm] = useState(false)
 
-  const toggleLike = (postId: number) => {
-    setLikedPosts((prev) => {
-      const next = new Set(prev)
-      if (next.has(postId)) next.delete(postId)
-      else next.add(postId)
-      return next
-    })
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/community/posts").then(r => r.json()).catch(() => []),
+      fetch("/api/community/ranking").then(r => r.json()).catch(() => []),
+    ]).then(([postsData, rankData]) => {
+      setPosts(Array.isArray(postsData) ? postsData : postsData.posts || [])
+      setRanking(Array.isArray(rankData) ? rankData : rankData.ranking || [])
+    }).finally(() => setLoading(false))
+  }, [])
+
+  async function createPost() {
+    if (!newTitle.trim() || !newPost.trim() || !userId) return
+    try {
+      await fetch("/api/community/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, title: newTitle, body: newPost, category: category === "Todos" ? "Dicas" : category }),
+      })
+      setNewTitle("")
+      setNewPost("")
+      setShowForm(false)
+      // Refresh
+      const res = await fetch("/api/community/posts").then(r => r.json())
+      setPosts(Array.isArray(res) ? res : res.posts || [])
+    } catch {}
   }
 
+  async function likePost(postId: string) {
+    if (!userId) return
+    await fetch("/api/community/like", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, postId }),
+    })
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: p.likes + 1 } : p))
+  }
+
+  const filtered = category === "Todos" ? posts : posts.filter(p => p.category === category)
+
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-          <GradientText as="span">Comunidade AdsUnify</GradientText>
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Conecte-se com outros empreendedores
-        </p>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-zinc-100 sm:text-3xl">
+            <GradientText as="span">Comunidade</GradientText>
+          </h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">Troque experiencias com outros empreendedores</p>
+        </div>
+        <GlowButton onClick={() => setShowForm(!showForm)}>
+          <Plus className="h-4 w-4" /> Nova publicacao
+        </GlowButton>
       </motion.div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left Column - Feed */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Create Post */}
-          <motion.div
-            variants={sectionVariants}
-            initial="hidden"
-            animate="show"
-            custom={0}
-          >
-            <GlassCard className="p-4" hover={false}>
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-sm font-bold text-white">
-                  J
-                </div>
-                <div className="flex-1">
-                  <textarea
-                    placeholder="Compartilhe algo com a comunidade..."
-                    className="w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-violet-500/50"
-                    rows={2}
-                  />
-                  <div className="mt-2 flex justify-end">
-                    <GlowButton size="sm">
-                      <Send className="h-3.5 w-3.5" />
-                      Publicar
-                    </GlowButton>
-                  </div>
-                </div>
-              </div>
+      {/* New post form */}
+      {showForm && (
+        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
+          <GlassCard className="p-5" hover={false}>
+            <input type="text" placeholder="Titulo da publicacao" value={newTitle} onChange={e => setNewTitle(e.target.value)}
+              className="h-11 w-full rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 text-sm text-slate-900 dark:text-zinc-100 outline-none focus:border-indigo-500/50 mb-3" />
+            <textarea placeholder="Compartilhe sua experiencia, duvida ou dica..." value={newPost} onChange={e => setNewPost(e.target.value)} rows={3}
+              className="w-full rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-sm text-slate-900 dark:text-zinc-100 outline-none focus:border-indigo-500/50 resize-none mb-3" />
+            <GlowButton onClick={createPost} disabled={!newTitle.trim() || !newPost.trim()}>
+              <Send className="h-4 w-4" /> Publicar
+            </GlowButton>
+          </GlassCard>
+        </motion.div>
+      )}
+
+      {/* Categories */}
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {categories.map(cat => (
+          <button key={cat} onClick={() => setCategory(cat)} className={cn(
+            "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+            category === cat ? "bg-indigo-500 text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400"
+          )}>{cat}</button>
+        ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Posts */}
+        <div className="lg:col-span-2 space-y-3">
+          {loading ? (
+            <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-indigo-500" /></div>
+          ) : filtered.length === 0 ? (
+            <GlassCard className="p-8 text-center" hover={false}>
+              <MessageCircle className="mx-auto h-10 w-10 text-slate-300 dark:text-zinc-600 mb-3" />
+              <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100 mb-1">Nenhuma publicacao ainda</h3>
+              <p className="text-sm text-slate-500 dark:text-zinc-400">Seja o primeiro a compartilhar!</p>
             </GlassCard>
-          </motion.div>
-
-          {/* Posts Feed */}
-          {posts.length === 0 ? (
-            <motion.div
-              variants={sectionVariants}
-              initial="hidden"
-              animate="show"
-              custom={1}
-            >
-              <GlassCard className="p-5">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="py-12 text-center"
-                >
-                  <div className="flex items-center justify-center h-16 w-16 rounded-2xl bg-slate-100 mx-auto mb-6">
-                    <MessageCircle className="h-8 w-8 text-slate-900/30" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="text-lg font-semibold text-slate-900/80 mb-2">
-                    A comunidade esta comecando!
-                  </h3>
-                  <p className="text-sm text-slate-500 max-w-md mx-auto">
-                    Seja o primeiro a postar. Compartilhe suas conquistas, duvidas ou dicas com outros empreendedores!
-                  </p>
-                </motion.div>
-              </GlassCard>
-            </motion.div>
           ) : (
-            posts.map((post, idx) => (
-              <motion.div
-                key={post.id}
-                variants={sectionVariants}
-                initial="hidden"
-                animate="show"
-                custom={idx + 1}
-              >
-                <GlassCard className="p-5">
-                  <div className="flex items-start gap-3">
-                    {/* Avatar */}
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${post.color}`}
-                    >
-                      {post.avatar}
+            filtered.map((post, i) => (
+              <motion.div key={post.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                <GlassCard className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/10 text-xs font-bold text-indigo-500">
+                      {post.author?.name?.[0] || "U"}
                     </div>
-
-                    <div className="flex-1 min-w-0">
-                      {/* Name + Level */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-slate-900">{post.name}</span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-xs font-medium text-violet-600">
-                          <Crown className="h-3 w-3" />
-                          Level {post.level}
-                        </span>
-                        <span className="text-xs text-slate-400">{post.time}</span>
-                      </div>
-
-                      {/* Content */}
-                      <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                        {post.content}
-                      </p>
-
-                      {/* Actions */}
-                      <div className="mt-3 flex items-center gap-4">
-                        <button
-                          onClick={() => toggleLike(post.id)}
-                          className="flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-pink-400"
-                        >
-                          <Heart
-                            className={`h-4 w-4 ${
-                              likedPosts.has(post.id)
-                                ? "fill-pink-400 text-pink-400"
-                                : ""
-                            }`}
-                          />
-                          {post.likes + (likedPosts.has(post.id) ? 1 : 0)}
-                        </button>
-                        <button className="flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-blue-400">
-                          <MessageCircle className="h-4 w-4" />
-                          {post.comments}
-                        </button>
-                      </div>
-                    </div>
+                    <span className="text-xs font-medium text-slate-700 dark:text-zinc-300">{post.author?.name || "Usuario"}</span>
+                    <span className="rounded-full bg-violet-500/10 px-1.5 py-0.5 text-[9px] font-bold text-violet-500">Lv{post.author?.level || 1}</span>
+                    <span className="ml-auto text-[10px] text-slate-400">{new Date(post.createdAt).toLocaleDateString("pt-BR")}</span>
+                  </div>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100 mb-1">{post.title}</h3>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 line-clamp-3">{post.body}</p>
+                  <div className="mt-3 flex items-center gap-4">
+                    <button onClick={() => likePost(post.id)} className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 transition-colors">
+                      <Heart className="h-3.5 w-3.5" /> {post.likes}
+                    </button>
+                    <span className="flex items-center gap-1 text-xs text-slate-400">
+                      <MessageCircle className="h-3.5 w-3.5" /> {post.commentCount}
+                    </span>
+                    <span className="rounded-full bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 text-[10px] text-slate-500">{post.category}</span>
                   </div>
                 </GlassCard>
               </motion.div>
@@ -194,79 +157,28 @@ export default function ComunidadePage() {
           )}
         </div>
 
-        {/* Right Column - Sidebar */}
-        <div className="space-y-6">
-          {/* Ranking */}
-          <motion.div
-            variants={sectionVariants}
-            initial="hidden"
-            animate="show"
-            custom={1}
-          >
-            <GlassCard className="p-5" hover={false}>
-              <div className="mb-4 flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-amber-400" />
-                <h2 className="font-semibold text-slate-900">Ranking do Mês</h2>
-              </div>
-              {ranking.length === 0 ? (
-                <p className="text-sm text-slate-400 text-center py-4">
-                  Nenhum participante ainda. Seja o primeiro!
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {ranking.map((user, idx) => (
-                    <motion.div
-                      key={user.name}
-                      className="flex items-center justify-between"
-                      initial={{ opacity: 0, x: 12 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + idx * 0.08 }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="w-5 text-center text-sm font-bold text-slate-500">
-                          {user.medal || `${idx + 1}`}
-                        </span>
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            {user.name}
-                          </p>
-                          <p className="text-xs text-slate-400">Lv.{user.level}</p>
-                        </div>
-                      </div>
-                      <span className="text-xs font-medium text-violet-600">
-                        +{user.xp.toLocaleString("pt-BR")} XP
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </GlassCard>
-          </motion.div>
-
-          {/* Categories */}
-          <motion.div
-            variants={sectionVariants}
-            initial="hidden"
-            animate="show"
-            custom={2}
-          >
-            <GlassCard className="p-5" hover={false}>
-              <div className="mb-4 flex items-center gap-2">
-                <Tag className="h-5 w-5 text-blue-400" />
-                <h2 className="font-semibold text-slate-900">Categorias</h2>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-violet-500/30 hover:text-violet-600"
-                  >
-                    {cat}
-                  </button>
+        {/* Ranking */}
+        <div>
+          <GlassCard className="p-5 sticky top-20" hover={false}>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100 mb-3 flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-amber-500" /> Ranking
+            </h3>
+            {ranking.length === 0 ? (
+              <p className="text-xs text-slate-500 dark:text-zinc-400 py-4 text-center">Ranking sera preenchido com usuarios ativos</p>
+            ) : (
+              <div className="space-y-2">
+                {ranking.slice(0, 10).map((user, i) => (
+                  <div key={user.id} className="flex items-center gap-2">
+                    <span className={cn("flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold",
+                      i === 0 ? "bg-amber-500 text-white" : i === 1 ? "bg-slate-400 text-white" : i === 2 ? "bg-orange-400 text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-500"
+                    )}>{i + 1}</span>
+                    <span className="text-xs font-medium text-slate-700 dark:text-zinc-300 flex-1 truncate">{user.name}</span>
+                    <span className="text-[10px] text-amber-500 font-medium">{user.xp} XP</span>
+                  </div>
                 ))}
               </div>
-            </GlassCard>
-          </motion.div>
+            )}
+          </GlassCard>
         </div>
       </div>
     </div>

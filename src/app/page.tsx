@@ -33,6 +33,12 @@ import { SmoothScrollProvider } from "@/components/landing/smooth-scroll"
 import { MagneticButton } from "@/components/landing/magnetic-button"
 import { GlowCard } from "@/components/landing/glow-card"
 import { cn } from "@/lib/utils"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 // Dynamic import for Three.js globe (no SSR)
 const GlobeScene = dynamic(
@@ -263,9 +269,9 @@ function Hero() {
   const globeOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0.3])
 
   return (
-    <section className="relative flex min-h-[110vh] flex-col items-center justify-center overflow-hidden">
+    <section data-gsap-hero className="relative flex min-h-[110vh] flex-col items-center justify-center overflow-hidden">
       {/* Background layers */}
-      <div className="hero-glow pointer-events-none absolute inset-0" />
+      <div data-gsap-hero-bg className="hero-glow pointer-events-none absolute inset-0" />
       <div className="grid-pattern pointer-events-none absolute inset-0 opacity-40" />
 
       {/* 3D Globe — full prominence */}
@@ -1262,21 +1268,44 @@ function Footer() {
    PAGE
    ═══════════════════════════════════════════════════════════════════ */
 export default function Home() {
+  const mainRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !mainRef.current) return
+    const ctx = gsap.context(() => {
+      // Animate each section on scroll
+      gsap.utils.toArray<HTMLElement>("[data-gsap-section]").forEach((el) => {
+        gsap.fromTo(el,
+          { y: 60, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1, ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 85%", end: "top 50%", toggleActions: "play none none none" }
+          }
+        )
+      })
+      // Parallax hero background
+      gsap.to("[data-gsap-hero-bg]", {
+        yPercent: 30, ease: "none",
+        scrollTrigger: { trigger: "[data-gsap-hero]", start: "top top", end: "bottom top", scrub: true }
+      })
+    }, mainRef)
+    return () => ctx.revert()
+  }, [])
+
   return (
     <SmoothScrollProvider>
-      <main className="relative min-h-screen overflow-hidden bg-[#09090B] text-zinc-50">
+      <main ref={mainRef} className="relative min-h-screen overflow-hidden bg-[#09090B] text-zinc-50">
         {/* Noise overlay */}
         <div className="noise-overlay" />
 
         <Navbar />
         <Hero />
-        <ProblemSection />
-        <FeaturesSection />
-        <HowItWorks />
-        <DemoSection />
-        <TestimonialsSection />
-        <PricingSection />
-        <CtaSection />
+        <div data-gsap-section><ProblemSection /></div>
+        <div data-gsap-section><FeaturesSection /></div>
+        <div data-gsap-section><HowItWorks /></div>
+        <div data-gsap-section><DemoSection /></div>
+        <div data-gsap-section><TestimonialsSection /></div>
+        <div data-gsap-section><PricingSection /></div>
+        <div data-gsap-section><CtaSection /></div>
         <Footer />
       </main>
     </SmoothScrollProvider>

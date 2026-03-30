@@ -1,19 +1,13 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/session-provider";
 import { GamificationProvider } from "@/components/providers/gamification-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
-const inter = Inter({
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-geist",
 });
 
 export const metadata: Metadata = {
@@ -54,7 +48,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="dark">
       <body
-        className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased bg-[#09090B] text-zinc-50`}
+        className={`${geist.variable} font-sans antialiased bg-[#09090B] text-zinc-50`}
       >
         <ThemeProvider>
           <AuthProvider>
