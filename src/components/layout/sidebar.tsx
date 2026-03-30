@@ -47,38 +47,22 @@ const navSections: NavSection[] = [
   {
     title: "PRINCIPAL",
     items: [
-      { label: "Dashboard", href: "/painel", icon: LayoutDashboard, description: "Visao geral do seu marketing" },
-      { label: "Co-Piloto IA", href: "/copilot", icon: Bot, description: "Seu assistente inteligente" },
-      { label: "Missões", href: "/missoes", icon: Target, description: "Tarefas semanais para crescer" },
-      { label: "Jornada", href: "/jornada", icon: Map, description: "Seu progresso e evolucao" },
+      { label: "Meu Painel", href: "/painel", icon: LayoutDashboard, description: "Veja como esta seu site e seus anuncios" },
+      { label: "Criar Anuncio", href: "/anuncios", icon: Megaphone, description: "A IA cria o anuncio perfeito pra voce" },
+      { label: "Verificar meu Site", href: "/seo", icon: Search, description: "Veja o que falta no seu site pra ficar 100%" },
     ],
   },
   {
-    title: "FERRAMENTAS",
+    title: "MONITORAMENTO",
     items: [
-      { label: "SEO", href: "/seo", icon: Search, description: "Melhore sua posicao no Google" },
-      { label: "Anúncios", href: "/anuncios", icon: Megaphone, description: "Gerencie Google e Meta Ads" },
-      { label: "Conteúdo", href: "/conteudo", icon: FileText, description: "Crie artigos e posts com IA" },
-      { label: "Concorrentes", href: "/concorrentes", icon: Eye, description: "Espie o que outros fazem" },
-      { label: "Prospeccao", href: "/prospeccao", icon: Globe, description: "Encontre leads no Google Maps" },
-      { label: "WhatsApp", href: "/whatsapp", icon: MessageCircle, description: "Automacao de mensagens" },
-      { label: "Landing Pages", href: "/landing-pages", icon: Layout, description: "Crie LPs com IA" },
+      { label: "Meus Anuncios", href: "/monitoramento", icon: BarChart3, description: "Acompanhe seus anuncios e o que mudar" },
+      { label: "Meus Sites", href: "/meus-sites", icon: Globe, description: "Gerencie todos os seus sites" },
     ],
   },
   {
-    title: "CRESCIMENTO",
+    title: "AJUDA",
     items: [
-      { label: "Previsão", href: "/previsao", icon: TrendingUp, description: "Analytics preditivo e forecast" },
-      { label: "Relatórios", href: "/relatorios", icon: BarChart3, description: "Dashboard real-time" },
-      { label: "Academy", href: "/academy", icon: GraduationCap, description: "Aprenda marketing digital" },
-      { label: "Comunidade", href: "/comunidade", icon: Users, description: "Conecte-se com outros" },
-      { label: "Marketplace", href: "/marketplace", icon: ShoppingBag, description: "Contrate profissionais" },
-    ],
-  },
-  {
-    title: "OUTROS",
-    items: [
-      { label: "Glossário", href: "/glossario", icon: BookOpen, description: "Termos de marketing" },
+      { label: "Co-Piloto IA", href: "/copilot", icon: Bot, description: "Tire qualquer duvida com a IA" },
       { label: "Configurações", href: "/configuracoes", icon: Settings, description: "Ajuste sua conta" },
     ],
   },

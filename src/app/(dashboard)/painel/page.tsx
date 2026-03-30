@@ -6,52 +6,19 @@ import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import {
-  Loader2, ArrowRight, ArrowUp, ArrowDown, Search, FileText,
-  Zap, Users, Bot, Lightbulb, Target, Flame, TrendingUp,
-  Megaphone, Eye, Radar, BarChart3, Shield, Swords, BookOpen,
+  Loader2, Globe, Search, Megaphone, BarChart3, ArrowRight, CheckCircle2,
+  XCircle, AlertTriangle, TrendingUp, Eye, Zap, Bot, ExternalLink,
 } from "lucide-react"
 import { useUserId } from "@/hooks/use-user-id"
 import { GlassCard } from "@/components/shared/glass-card"
 import { GradientText } from "@/components/shared/gradient-text"
 import { GlowButton } from "@/components/shared/glow-button"
 import { AnimatedCounter } from "@/components/shared/animated-counter"
-import { HealthScoreRing } from "@/components/dashboard/health-score-ring"
-import { MissionsPreview } from "@/components/dashboard/missions-preview"
-import { ActivityFeed } from "@/components/dashboard/activity-feed"
-import { CopilotPreview } from "@/components/dashboard/copilot-preview"
-import { AreaChartCard } from "@/components/charts/area-chart"
 import { cn } from "@/lib/utils"
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
-  show: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.5, ease: "easeOut" as const, delay: i * 0.08 },
-  }),
-}
-
-interface Opportunity {
-  id: string
-  type: string
-  title: string
-  description: string
-  impact: string
-  impactScore: number
-  actionUrl: string
-  category: string
-}
-
-interface ActionItem {
-  id: string
-  title: string
-  description: string
-  howToFix: string
-  impact: number
-  ease: number
-  priority: string
-  estimatedTime: string
-  category: string
-  weekSuggestion: number
+  show: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.45, delay: i * 0.08 } }),
 }
 
 function DashboardInner() {
@@ -61,198 +28,257 @@ function DashboardInner() {
 
   const [loading, setLoading] = useState(true)
   const [userData, setUserData] = useState<any>(null)
-  const [healthScore, setHealthScore] = useState(0)
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([])
-  const [actionPlan, setActionPlan] = useState<ActionItem[]>([])
-  const [contentCount, setContentCount] = useState(0)
-  const [keywordCount, setKeywordCount] = useState(0)
-  const [trafficData, setTrafficData] = useState<any[]>([])
+  const [sites, setSites] = useState<any[]>([])
+  const [auditScore, setAuditScore] = useState<number | null>(null)
+  const [auditIssues, setAuditIssues] = useState<any[]>([])
+  const [auditLoading, setAuditLoading] = useState(false)
+  const [hasAdsConnected, setHasAdsConnected] = useState(false)
 
   useEffect(() => {
     if (!userId) return
     async function load() {
       try {
-        // Fetch all data in parallel
-        const [userRes, oppRes, actionRes, contentRes, kwRes, healthRes] = await Promise.all([
+        const [userRes, sitesRes] = await Promise.all([
           fetch(`/api/user?userId=${userId}`).then(r => r.json()).catch(() => null),
-          fetch(`/api/opportunities?userId=${userId}`).then(r => r.json()).catch(() => ({ opportunities: [] })),
-          fetch(`/api/health-score/action-plan?userId=${userId}`).then(r => r.json()).catch(() => ({ actions: [] })),
-          fetch(`/api/content?userId=${userId}`).then(r => r.json()).catch(() => ({ monthlyCount: 0 })),
-          fetch(`/api/seo/keywords?userId=${userId}`).then(r => r.json()).catch(() => []),
-          fetch(`/api/health-score?userId=${userId}`).then(r => r.json()).catch(() => ({ overallScore: 0 })),
+          fetch(`/api/sites?userId=${userId}`).then(r => r.json()).catch(() => []),
         ])
 
         if (userRes && !userRes.businessUrl && !userRes.businessNiche) {
-          router.push("/setup")
+          router.push("/onboarding")
           return
         }
 
         setUserData(userRes)
-        setOpportunities(oppRes.opportunities || [])
-        setActionPlan(actionRes.actions || [])
-        setContentCount(contentRes.monthlyCount || contentRes.contents?.length || 0)
-        setKeywordCount(Array.isArray(kwRes) ? kwRes.length : 0)
-        setHealthScore(healthRes.overallScore || healthRes.score || 0)
+        setSites(Array.isArray(sitesRes) ? sitesRes : [])
 
-        // Mock traffic trend (replaced with real GSC data when connected)
-        setTrafficData([
-          { name: "Sem 1", visitas: 120, impressoes: 3400 },
-          { name: "Sem 2", visitas: 185, impressoes: 4100 },
-          { name: "Sem 3", visitas: 210, impressoes: 4800 },
-          { name: "Sem 4", visitas: 290, impressoes: 5600 },
-        ])
+        // Check if has Google Ads connected
+        fetch(`/api/ads/accounts?userId=${userId}`)
+          .then(r => r.json())
+          .then(d => setHasAdsConnected(Array.isArray(d) ? d.length > 0 : false))
+          .catch(() => {})
+
+        // Auto-run audit on main site
+        if (userRes?.businessUrl && userId) {
+          runAudit(userId, userRes.businessUrl)
+        }
       } catch {}
       setLoading(false)
     }
     load()
   }, [userId, router])
 
+  async function runAudit(uid: string, url: string) {
+    setAuditLoading(true)
+    try {
+      const fullUrl = url.startsWith("http") ? url : `https://${url}`
+      const res = await fetch("/api/seo/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: uid, url: fullUrl }),
+      })
+      const data = await res.json()
+      if (data.score !== undefined) {
+        setAuditScore(data.score)
+        setAuditIssues(data.issues || [])
+      }
+    } catch {}
+    setAuditLoading(false)
+  }
+
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-      </div>
-    )
+    return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-8 w-8 animate-spin text-indigo-500" /></div>
   }
 
   const userName = userData?.name || session?.user?.name || "Usuario"
-  const xp = userData?.xp || 0
-  const level = userData?.level || 1
-  const quickWins = actionPlan.filter(a => a.priority === "quick-win")
+  const siteUrl = userData?.businessUrl || ""
+  const okCount = auditIssues.filter((i: any) => i.severity === "ok").length
+  const problemCount = auditIssues.filter((i: any) => i.severity !== "ok").length
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-16">
-      {/* ── Header ── */}
+    <div className="mx-auto max-w-5xl space-y-6 pb-16">
+      {/* Header */}
       <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0}>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-zinc-100 sm:text-3xl">
-              Ola, <GradientText as="span">{userName.split(" ")[0]}</GradientText>
-            </h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
-              Aqui esta o resumo do seu marketing digital
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-500 dark:text-indigo-400">
-              Level {level}
-            </span>
-            <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-500">
-              {xp.toLocaleString()} XP
-            </span>
-          </div>
-        </div>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-zinc-100 sm:text-3xl">
+          Ola, <GradientText as="span">{userName.split(" ")[0]}</GradientText>!
+        </h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
+          Aqui esta o resumo do seu negocio. Escolha o que voce quer fazer.
+        </p>
       </motion.div>
 
-      {/* ── Bento Grid Row 1: Stats ── */}
-      <motion.div variants={fadeUp} initial="hidden" animate="show" custom={1} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {[
-          { label: "Score Digital", value: healthScore, icon: Shield, color: "text-indigo-500", bg: "bg-indigo-500/10", suffix: "/100" },
-          { label: "Keywords Rastreadas", value: keywordCount, icon: Search, color: "text-violet-500", bg: "bg-violet-500/10" },
-          { label: "Conteudos Publicados", value: contentCount, icon: FileText, color: "text-cyan-500", bg: "bg-cyan-500/10" },
-          { label: "XP Total", value: xp, icon: Zap, color: "text-amber-500", bg: "bg-amber-500/10" },
-        ].map((stat) => (
-          <GlassCard key={stat.label} className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", stat.bg)}>
-                <stat.icon className={cn("h-4 w-4", stat.color)} />
+      {/* Dois caminhos principais */}
+      <motion.div variants={fadeUp} initial="hidden" animate="show" custom={1} className="grid gap-4 sm:grid-cols-2">
+        {/* Caminho A: Criar Anuncio */}
+        <Link href="/anuncios">
+          <motion.div whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }}>
+            <GlassCard className="p-6 h-full border-2 border-transparent hover:border-indigo-500/30 transition-colors" glow>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 mb-4">
+                <Megaphone className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xs text-slate-500 dark:text-zinc-400">{stat.label}</span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <AnimatedCounter value={stat.value} className="text-2xl font-bold text-slate-900 dark:text-zinc-100" />
-              {stat.suffix && <span className="text-sm text-slate-400 dark:text-zinc-500">{stat.suffix}</span>}
-            </div>
-          </GlassCard>
-        ))}
+              <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-100 mb-1">Quero criar um anuncio</h3>
+              <p className="text-sm text-slate-500 dark:text-zinc-400 mb-3">
+                A IA cria o anuncio perfeito pro seu negocio e te guia passo a passo pra publicar
+              </p>
+              <span className="flex items-center gap-1 text-sm font-medium text-indigo-500">
+                Comecar <ArrowRight className="h-4 w-4" />
+              </span>
+            </GlassCard>
+          </motion.div>
+        </Link>
+
+        {/* Caminho B: Verificar Site */}
+        <Link href="/seo">
+          <motion.div whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }}>
+            <GlassCard className="p-6 h-full border-2 border-transparent hover:border-cyan-500/30 transition-colors" glow>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 mb-4">
+                <Search className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-100 mb-1">Quero verificar meu site</h3>
+              <p className="text-sm text-slate-500 dark:text-zinc-400 mb-3">
+                Veja o que falta no seu site pra aparecer no Google e ter mais visitantes
+              </p>
+              <span className="flex items-center gap-1 text-sm font-medium text-cyan-500">
+                Verificar <ArrowRight className="h-4 w-4" />
+              </span>
+            </GlassCard>
+          </motion.div>
+        </Link>
       </motion.div>
 
-      {/* ── Bento Grid Row 2: Health Score + Opportunities ── */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Health Score Ring */}
+      {/* Diagnostico do site (se tem URL) */}
+      {siteUrl && (
         <motion.div variants={fadeUp} initial="hidden" animate="show" custom={2}>
-          <GlassCard className="flex flex-col items-center justify-center p-6" hover={false}>
-            <HealthScoreRing score={healthScore} size={180} />
-            <div className="mt-4 w-full">
-              <Link href="/seo" className="flex items-center justify-center gap-1.5 text-sm font-medium text-indigo-500 hover:text-indigo-400 transition-colors">
-                Ver auditoria completa <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </GlassCard>
-        </motion.div>
-
-        {/* Opportunity Radar */}
-        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={3} className="lg:col-span-2">
-          <GlassCard className="p-5 h-full" hover={false}>
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Radar className="h-5 w-5 text-indigo-500" />
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Radar de Oportunidades</h3>
+          <GlassCard className="p-5" hover={false}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Globe className="h-5 w-5 text-indigo-500" />
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Diagnostico: {siteUrl}</h3>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">Analise automatica do seu site</p>
+                </div>
               </div>
-              {opportunities.length > 0 && (
-                <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-semibold text-indigo-500">
-                  {opportunities.length} encontradas
+              {auditLoading ? (
+                <span className="flex items-center gap-1.5 text-xs text-indigo-500">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Analisando...
                 </span>
-              )}
+              ) : auditScore !== null ? (
+                <div className={cn(
+                  "rounded-full px-4 py-1.5 text-sm font-bold",
+                  auditScore >= 80 ? "bg-green-500/10 text-green-500" :
+                  auditScore >= 50 ? "bg-amber-500/10 text-amber-500" :
+                  "bg-red-500/10 text-red-500"
+                )}>
+                  <AnimatedCounter value={auditScore} className="inline" />/100
+                </div>
+              ) : null}
             </div>
 
-            {opportunities.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <Radar className="h-10 w-10 text-slate-200 dark:text-zinc-700 mb-3" />
-                <p className="text-sm text-slate-500 dark:text-zinc-400">Nenhuma oportunidade no momento</p>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {opportunities.slice(0, 4).map((opp) => (
-                  <Link key={opp.id} href={opp.actionUrl}>
-                    <motion.div
-                      whileHover={{ x: 4 }}
-                      className="flex items-start gap-3 rounded-xl border border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-3 transition-colors hover:border-indigo-200 dark:hover:border-indigo-800"
-                    >
-                      <div className={cn(
-                        "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold",
-                        opp.impact === "alto" ? "bg-red-500/10 text-red-500" :
-                        opp.impact === "medio" ? "bg-amber-500/10 text-amber-500" :
-                        "bg-blue-500/10 text-blue-500"
-                      )}>
-                        {opp.impactScore}
+            {auditScore !== null && (
+              <>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="rounded-xl bg-green-500/5 border border-green-500/10 p-3 text-center">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-green-500">{okCount}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">Tudo certo</p>
+                  </div>
+                  <div className="rounded-xl bg-red-500/5 border border-red-500/10 p-3 text-center">
+                    <XCircle className="h-5 w-5 text-red-500 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-red-500">{problemCount}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">Precisa arrumar</p>
+                  </div>
+                </div>
+
+                {/* Top 3 problemas */}
+                {problemCount > 0 && (
+                  <div className="space-y-2 mb-3">
+                    {auditIssues.filter((i: any) => i.severity !== "ok").slice(0, 3).map((issue: any, idx: number) => (
+                      <div key={idx} className="flex items-start gap-2 rounded-lg border border-red-500/10 bg-red-500/5 p-2.5">
+                        <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-xs font-medium text-slate-900 dark:text-zinc-100">{issue.title}</p>
+                          <p className="text-[11px] text-slate-500 dark:text-zinc-400">{issue.description}</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900 dark:text-zinc-100 truncate">{opp.title}</p>
-                        <p className="text-xs text-slate-500 dark:text-zinc-400 truncate">{opp.description}</p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-slate-300 dark:text-zinc-600 shrink-0 mt-1" />
-                    </motion.div>
-                  </Link>
-                ))}
-              </div>
+                    ))}
+                  </div>
+                )}
+
+                <Link href="/seo">
+                  <GlowButton variant="secondary" size="sm" className="w-full">
+                    Ver analise completa e como arrumar <ArrowRight className="h-3.5 w-3.5" />
+                  </GlowButton>
+                </Link>
+              </>
             )}
           </GlassCard>
         </motion.div>
-      </div>
+      )}
 
-      {/* ── Bento Grid Row 3: Quick Wins ── */}
-      {quickWins.length > 0 && (
+      {/* Status dos anuncios */}
+      <motion.div variants={fadeUp} initial="hidden" animate="show" custom={3}>
+        <GlassCard className="p-5" hover={false}>
+          <div className="flex items-center gap-3 mb-3">
+            <BarChart3 className="h-5 w-5 text-indigo-500" />
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Seus Anuncios</h3>
+          </div>
+
+          {hasAdsConnected ? (
+            <div>
+              <p className="text-sm text-green-500 mb-3 flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4" /> Google Ads conectado
+              </p>
+              <Link href="/monitoramento">
+                <GlowButton size="sm">
+                  <Eye className="h-4 w-4" /> Ver como estao seus anuncios
+                </GlowButton>
+              </Link>
+            </div>
+          ) : (
+            <div>
+              <p className="text-sm text-slate-500 dark:text-zinc-400 mb-3">
+                Voce ainda nao tem anuncios conectados. Tem duas opcoes:
+              </p>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Link href="/anuncios">
+                  <GlowButton size="sm">
+                    <Megaphone className="h-4 w-4" /> Criar meu primeiro anuncio
+                  </GlowButton>
+                </Link>
+                <Link href="/monitoramento">
+                  <GlowButton size="sm" variant="secondary">
+                    <ExternalLink className="h-4 w-4" /> Ja tenho anuncios — conectar
+                  </GlowButton>
+                </Link>
+              </div>
+            </div>
+          )}
+        </GlassCard>
+      </motion.div>
+
+      {/* Multi-site */}
+      {sites.length > 1 && (
         <motion.div variants={fadeUp} initial="hidden" animate="show" custom={4}>
           <GlassCard className="p-5" hover={false}>
-            <div className="mb-4 flex items-center gap-2">
-              <Zap className="h-5 w-5 text-amber-500" />
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Quick Wins — Acoes rapidas de alto impacto</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100 flex items-center gap-2">
+                <Globe className="h-4 w-4 text-indigo-500" /> Seus Sites ({sites.length})
+              </h3>
+              <Link href="/meus-sites" className="text-xs text-indigo-500 hover:underline">Gerenciar</Link>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {quickWins.slice(0, 6).map((action) => (
-                <div key={action.id} className="rounded-xl border border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-sm font-medium text-slate-900 dark:text-zinc-100">{action.title}</span>
-                    <span className="shrink-0 rounded-full bg-green-500/10 px-2 py-0.5 text-[10px] font-bold text-green-500">{action.estimatedTime}</span>
+            <div className="space-y-2">
+              {sites.map((site: any) => (
+                <div key={site.id} className="flex items-center justify-between rounded-xl border border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900 dark:text-zinc-100">{site.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-zinc-400">{site.url}</p>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 mb-3 line-clamp-2">{action.description}</p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 rounded-full bg-slate-100 dark:bg-zinc-800">
-                      <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500" style={{ width: `${action.impact * 10}%` }} />
-                    </div>
-                    <span className="text-[10px] text-slate-400">Impacto {action.impact}/10</span>
-                  </div>
+                  {site.lastScore !== null && site.lastScore !== undefined && (
+                    <span className={cn("rounded-full px-2 py-0.5 text-xs font-bold",
+                      site.lastScore >= 70 ? "bg-green-500/10 text-green-500" :
+                      site.lastScore >= 40 ? "bg-amber-500/10 text-amber-500" :
+                      "bg-red-500/10 text-red-500"
+                    )}>{site.lastScore}</span>
+                  )}
                 </div>
               ))}
             </div>
@@ -260,60 +286,22 @@ function DashboardInner() {
         </motion.div>
       )}
 
-      {/* ── Bento Grid Row 4: Traffic Chart + Missions ── */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={5}>
-          <AreaChartCard
-            data={trafficData}
-            dataKey="visitas"
-            secondaryKey="impressoes"
-            title="Trafego Organico"
-            subtitle="Ultimas 4 semanas (conecte GSC para dados reais)"
-            color="#6366f1"
-            secondaryColor="#a855f7"
-            height={220}
-          />
-        </motion.div>
-
-        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={6}>
-          <MissionsPreview />
-        </motion.div>
-      </div>
-
-      {/* ── Bento Grid Row 5: Co-Pilot + Activity ── */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={7}>
-          <CopilotPreview />
-        </motion.div>
-
-        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={8}>
-          <ActivityFeed />
-        </motion.div>
-      </div>
-
-      {/* ── Bento Grid Row 6: Quick Links ── */}
-      <motion.div variants={fadeUp} initial="hidden" animate="show" custom={9}>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {[
-            { label: "SEO", href: "/seo", icon: Search, color: "from-blue-500 to-cyan-500" },
-            { label: "Anuncios", href: "/anuncios", icon: Megaphone, color: "from-violet-500 to-purple-500" },
-            { label: "Conteudo", href: "/conteudo", icon: FileText, color: "from-emerald-500 to-green-500" },
-            { label: "Concorrentes", href: "/concorrentes", icon: Swords, color: "from-red-500 to-orange-500" },
-            { label: "Relatorios", href: "/relatorios", icon: BarChart3, color: "from-indigo-500 to-blue-500" },
-            { label: "Academy", href: "/glossario", icon: BookOpen, color: "from-amber-500 to-yellow-500" },
-          ].map((item) => (
-            <Link key={item.href} href={item.href}>
-              <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
-                <GlassCard className="flex flex-col items-center gap-2 p-4 text-center">
-                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br", item.color)}>
-                    <item.icon className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="text-xs font-medium text-slate-700 dark:text-zinc-300">{item.label}</span>
-                </GlassCard>
-              </motion.div>
-            </Link>
-          ))}
-        </div>
+      {/* Co-Piloto */}
+      <motion.div variants={fadeUp} initial="hidden" animate="show" custom={5}>
+        <Link href="/copilot">
+          <GlassCard className="p-5 border-2 border-transparent hover:border-violet-500/20 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-500">
+                <Bot className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Tem alguma duvida?</h3>
+                <p className="text-xs text-slate-500 dark:text-zinc-400">Pergunte qualquer coisa pro Co-Piloto IA — ele te ajuda com tudo</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-slate-400" />
+            </div>
+          </GlassCard>
+        </Link>
       </motion.div>
     </div>
   )
@@ -321,11 +309,7 @@ function DashboardInner() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-8 w-8 animate-spin text-indigo-500" /></div>}>
       <DashboardInner />
     </Suspense>
   )
