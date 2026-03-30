@@ -94,8 +94,8 @@ function NavItemLink({
         "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
         isCollapsed && "justify-center px-2",
         isActive
-          ? "bg-violet-50 text-violet-700 font-semibold"
-          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+          ? "bg-violet-50 text-violet-700 font-semibold dark:bg-violet-500/10 dark:text-violet-400"
+          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
       )}
     >
       {/* Active / hover left border */}
@@ -120,7 +120,7 @@ function NavItemLink({
             className="truncate whitespace-nowrap flex flex-col"
           >
             <span className="truncate">{item.label}</span>
-            <span className="text-[10px] font-normal text-slate-400 truncate leading-tight">
+            <span className="text-[10px] font-normal text-slate-400 truncate leading-tight dark:text-zinc-600">
               {item.description}
             </span>
           </motion.div>
@@ -128,9 +128,9 @@ function NavItemLink({
       </AnimatePresence>
 
       {/* Tooltip on hover (always visible, shows description) */}
-      <div className="pointer-events-none absolute left-full ml-2 z-50 hidden rounded-lg bg-white shadow-lg border border-slate-200 px-3 py-2 group-hover:block">
-        <span className="text-xs font-medium text-slate-900 whitespace-nowrap">{item.label}</span>
-        <span className="block text-[10px] text-slate-500 whitespace-nowrap">{item.description}</span>
+      <div className="pointer-events-none absolute left-full ml-2 z-50 hidden rounded-lg bg-white shadow-lg border border-slate-200 px-3 py-2 group-hover:block dark:bg-zinc-800 dark:border-zinc-700">
+        <span className="text-xs font-medium text-slate-900 whitespace-nowrap dark:text-zinc-100">{item.label}</span>
+        <span className="block text-[10px] text-slate-500 whitespace-nowrap dark:text-zinc-500">{item.description}</span>
       </div>
     </Link>
   );
@@ -160,7 +160,7 @@ export function Sidebar() {
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className={cn(
         "fixed left-0 top-0 z-40 hidden h-screen flex-col md:flex",
-        "bg-white border-r border-slate-200"
+        "bg-white border-r border-slate-200 dark:bg-[#0f0f12] dark:border-zinc-800"
       )}
     >
       {/* Logo */}
@@ -195,14 +195,14 @@ export function Sidebar() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
-                  className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400"
+                  className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-zinc-600"
                 >
                   {section.title}
                 </motion.h3>
               )}
             </AnimatePresence>
             {isCollapsed && (
-              <div className="mx-auto mb-2 h-px w-6 bg-slate-200" />
+              <div className="mx-auto mb-2 h-px w-6 bg-slate-200 dark:bg-zinc-800" />
             )}
             <div className="space-y-0.5">
               {section.items.map((item) => {
@@ -222,7 +222,7 @@ export function Sidebar() {
       </nav>
 
       {/* User section */}
-      <div className="border-t border-slate-200 p-3">
+      <div className="border-t border-slate-200 p-3 dark:border-zinc-800">
         {session ? (
           <div
             className={cn(
@@ -230,7 +230,7 @@ export function Sidebar() {
               isCollapsed && "justify-center"
             )}
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-100 text-sm font-semibold text-violet-700">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-100 text-sm font-semibold text-violet-700 dark:bg-violet-500/20 dark:text-violet-400">
               {userInitials}
             </div>
             <AnimatePresence mode="wait">
@@ -242,10 +242,10 @@ export function Sidebar() {
                   transition={{ duration: 0.2 }}
                   className="flex-1 overflow-hidden"
                 >
-                  <p className="truncate text-sm font-medium text-slate-900">
+                  <p className="truncate text-sm font-medium text-slate-900 dark:text-zinc-100">
                     {userName}
                   </p>
-                  <span className="inline-flex items-center rounded-md bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 uppercase">
+                  <span className="inline-flex items-center rounded-md bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 uppercase dark:bg-violet-500/20 dark:text-violet-400">
                     {userPlan}
                   </span>
                 </motion.div>
@@ -256,7 +256,7 @@ export function Sidebar() {
           <Link
             href="/login"
             className={cn(
-              "flex items-center gap-3 rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900",
+              "flex items-center gap-3 rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100",
               isCollapsed && "justify-center"
             )}
           >
@@ -281,7 +281,7 @@ export function Sidebar() {
         <button
           onClick={toggle}
           className={cn(
-            "mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2 text-xs font-medium text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600",
+            "mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2 text-xs font-medium text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300",
             isCollapsed && "px-0"
           )}
         >

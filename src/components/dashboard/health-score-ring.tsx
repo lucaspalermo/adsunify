@@ -109,12 +109,12 @@ export function HealthScoreRing({
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <AnimatedCounter
             value={score}
-            className="text-5xl font-bold text-slate-900"
+            className="text-5xl font-bold text-slate-900 dark:text-zinc-100"
           />
         </div>
       </div>
 
-      <span className="mt-3 text-sm font-medium text-slate-500">
+      <span className="mt-3 text-sm font-medium text-slate-500 dark:text-zinc-400">
         Saúde do Marketing
       </span>
     </div>

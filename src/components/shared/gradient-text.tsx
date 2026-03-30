@@ -1,4 +1,4 @@
-import { type ElementType, type ReactNode } from "react"
+import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 interface GradientTextProps {
@@ -7,7 +7,7 @@ interface GradientTextProps {
   from?: string
   via?: string
   to?: string
-  as?: ElementType
+  as?: "span" | "h1" | "h2" | "h3" | "h4" | "p" | "div"
 }
 
 export function GradientText({
@@ -16,10 +16,10 @@ export function GradientText({
   from = "from-violet-600",
   via = "via-blue-500",
   to = "to-cyan-500",
-  as: Component = "span",
+  as: Tag = "span",
 }: GradientTextProps) {
   return (
-    <Component
+    <Tag
       className={cn(
         "bg-gradient-to-r bg-clip-text text-transparent",
         from,
@@ -29,7 +29,7 @@ export function GradientText({
       )}
     >
       {children}
-    </Component>
+    </Tag>
   )
 }
 

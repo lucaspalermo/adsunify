@@ -56,7 +56,7 @@ const item = {
 export function ActivityFeed({ className }: { className?: string }) {
   return (
     <GlassCard hover={false} className={cn("p-6", className)}>
-      <h3 className="mb-5 text-base font-semibold text-slate-900">
+      <h3 className="mb-5 text-base font-semibold text-slate-900 dark:text-zinc-100">
         Atividade Recente
       </h3>
 
@@ -89,10 +89,10 @@ export function ActivityFeed({ className }: { className?: string }) {
 
             {/* Content */}
             <div className="min-w-0 flex-1">
-              <p className="text-sm leading-relaxed text-slate-600">
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-zinc-300">
                 {activity.description}
               </p>
-              <p className="mt-0.5 text-xs text-slate-400">{activity.time}</p>
+              <p className="mt-0.5 text-xs text-slate-400 dark:text-zinc-500">{activity.time}</p>
             </div>
           </motion.div>
         ))}

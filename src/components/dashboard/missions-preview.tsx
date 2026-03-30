@@ -60,7 +60,7 @@ export function MissionsPreview({ className }: { className?: string }) {
     <GlassCard hover={false} className={cn("p-6", className)}>
       {/* Header */}
       <div className="mb-5 flex items-center justify-between">
-        <h3 className="text-base font-semibold text-slate-900">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100">
           Missões da Semana
         </h3>
         <Link
@@ -85,10 +85,10 @@ export function MissionsPreview({ className }: { className?: string }) {
             <motion.div
               key={index}
               variants={item}
-              className="rounded-xl border border-slate-200 bg-white p-3.5"
+              className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3.5"
             >
               <div className="mb-2 flex items-start justify-between gap-2">
-                <p className="text-sm font-medium text-slate-700 leading-snug">
+                <p className="text-sm font-medium text-slate-700 dark:text-zinc-300 leading-snug">
                   {mission.title}
                 </p>
                 <span
@@ -102,10 +102,10 @@ export function MissionsPreview({ className }: { className?: string }) {
               </div>
 
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-400 dark:text-zinc-500">
                   +{mission.xp} XP
                 </span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-400 dark:text-zinc-500">
                   {mission.progress}%
                 </span>
               </div>

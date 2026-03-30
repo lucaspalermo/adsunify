@@ -5,13 +5,14 @@ import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { CommandPalette } from "@/components/command-palette";
 import { useSidebarStore } from "@/stores/sidebar-store";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const isCollapsed = useSidebarStore((s) => s.isCollapsed);
 
   return (
-    <div className="relative min-h-screen bg-[#f8f9fc]">
+    <div className="relative min-h-screen bg-[#f8f9fc] dark:bg-[#09090B]">
       <Sidebar />
       <Topbar />
 
@@ -25,6 +26,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </main>
 
       <MobileNav />
+      <CommandPalette />
     </div>
   );
 }

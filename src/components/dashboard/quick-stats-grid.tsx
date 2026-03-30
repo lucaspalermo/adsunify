@@ -9,7 +9,7 @@ import { AnimatedCounter } from "@/components/shared/animated-counter"
 interface StatCard {
   title: string
   value: number
-  icon: React.ElementType
+  icon: React.ComponentType<{ className?: string }>
   iconBg: string
   iconColor: string
   change: string
@@ -92,12 +92,12 @@ export function QuickStatsGrid({ className }: { className?: string }) {
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-slate-500 truncate">
+                <p className="text-xs font-medium text-slate-500 dark:text-zinc-400 truncate">
                   {stat.title}
                 </p>
                 <AnimatedCounter
                   value={stat.value}
-                  className="text-xl font-bold text-slate-900"
+                  className="text-xl font-bold text-slate-900 dark:text-zinc-100"
                 />
                 <div className="mt-1 flex items-center gap-1">
                   {stat.changeType === "positive" && (
@@ -108,7 +108,7 @@ export function QuickStatsGrid({ className }: { className?: string }) {
                       "text-xs font-medium",
                       stat.changeType === "positive"
                         ? "text-green-400"
-                        : "text-slate-500"
+                        : "text-slate-500 dark:text-zinc-400"
                     )}
                   >
                     {stat.change}

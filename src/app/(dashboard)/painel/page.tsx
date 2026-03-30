@@ -278,7 +278,7 @@ function DashboardInner() {
   const infoKeywords = aiPlan?.suggestedKeywords?.filter(kw => !buyKeywords.includes(kw)) || []
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 pb-16">
+    <div className="mx-auto max-w-6xl space-y-6 pb-16">
       {/* Header with site info */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
         <GlassCard hover={false} className="p-5">
@@ -288,8 +288,8 @@ function DashboardInner() {
                 <Megaphone className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-slate-900">Central de Anuncios - {siteName}</h1>
-                <p className="text-sm text-slate-500">Siga os passos abaixo para criar seus anuncios como uma agencia faria</p>
+                <h1 className="text-lg font-bold text-slate-900 dark:text-zinc-100 dark:text-zinc-100">Central de Anuncios - {siteName}</h1>
+                <p className="text-sm text-slate-500 dark:text-zinc-400 dark:text-zinc-400">Siga os passos abaixo para criar seus anuncios como uma agencia faria</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -299,7 +299,7 @@ function DashboardInner() {
                 </span>
               ) : auditData ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">Score:</span>
+                  <span className="text-sm text-slate-500 dark:text-zinc-400">Score:</span>
                   <span className={cn(
                     "rounded-full px-3 py-1 text-sm font-bold",
                     auditData.score >= 80 ? "bg-green-100 text-green-700" :
@@ -322,8 +322,8 @@ function DashboardInner() {
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white">1</div>
               <div>
-                <h3 className="text-base font-semibold text-slate-900">Seu site esta pronto para receber anuncios?</h3>
-                <p className="text-sm text-slate-500">Antes de gastar dinheiro, seu site precisa estar preparado para converter visitantes em clientes</p>
+                <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100">Seu site esta pronto para receber anuncios?</h3>
+                <p className="text-sm text-slate-500 dark:text-zinc-400">Antes de gastar dinheiro, seu site precisa estar preparado para converter visitantes em clientes</p>
               </div>
             </div>
             {auditLoading && <span className="flex items-center gap-1.5 text-xs text-violet-600"><Loader2 className="h-3.5 w-3.5 animate-spin" />Verificando...</span>}
@@ -349,7 +349,7 @@ function DashboardInner() {
                 <Link href="/seo?acao=audit" className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-600 hover:text-violet-700">
                   Ver auditoria completa <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-400 dark:text-zinc-500">
                   {auditData.issues.filter(i => i.severity === "ok").length}/{auditData.issues.length} itens OK
                 </span>
               </div>
@@ -364,8 +364,8 @@ function DashboardInner() {
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-sm font-bold text-white">1B</div>
             <div>
-              <h3 className="text-base font-semibold text-slate-900">Instalar ferramentas de rastreamento</h3>
-              <p className="text-sm text-slate-500">Obrigatorio para medir os resultados dos seus anuncios — sem isso voce gasta dinheiro no escuro</p>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100">Instalar ferramentas de rastreamento</h3>
+              <p className="text-sm text-slate-500 dark:text-zinc-400">Obrigatorio para medir os resultados dos seus anuncios — sem isso voce gasta dinheiro no escuro</p>
             </div>
           </div>
           <div className="ml-[52px] space-y-3">
@@ -427,14 +427,14 @@ function DashboardInner() {
               const isExpanded = !!expandedSections[`tool-${tool.id}`]
               const isDone = !!completedSteps[`tool-${tool.id}-done`]
               return (
-                <div key={tool.id} className={cn("rounded-xl border px-4 py-3 transition-all", isDone ? "border-green-200 bg-green-50/50" : "border-slate-100 bg-slate-50/50")}>
+                <div key={tool.id} className={cn("rounded-xl border px-4 py-3 transition-all", isDone ? "border-green-200 bg-green-50/50" : "border-slate-100 bg-slate-50 dark:bg-zinc-800/50/50")}>
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" checked={isDone} onChange={() => toggleStep(`tool-${tool.id}-done`)} className="h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-500" />
                         <div>
                           <span className={cn("text-sm font-medium", isDone ? "text-green-700 line-through" : "text-slate-700")}>{tool.title}</span>
-                          <p className="text-xs text-slate-500">{tool.why}</p>
+                          <p className="text-xs text-slate-500 dark:text-zinc-400">{tool.why}</p>
                         </div>
                       </label>
                     </div>
@@ -445,8 +445,8 @@ function DashboardInner() {
                     )}
                   </div>
                   {isExpanded && !isDone && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-3 border-t border-slate-200 pt-3">
-                      <ol className="space-y-1.5 text-xs text-slate-600 list-decimal list-inside">
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-3 border-t border-slate-200 dark:border-zinc-800 pt-3">
+                      <ol className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-300 list-decimal list-inside">
                         {tool.steps.map((step, si) => (
                           <li key={si} className="leading-relaxed">{step}</li>
                         ))}
@@ -469,13 +469,13 @@ function DashboardInner() {
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-green-600 text-sm font-bold text-white">2</div>
             <div>
-              <h3 className="text-base font-semibold text-slate-900">Configurar suas contas de anuncio</h3>
-              <p className="text-sm text-slate-500">Crie suas contas no Google Ads e Meta Ads (gratis) — voce so paga quando ativar anuncios</p>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100">Configurar suas contas de anuncio</h3>
+              <p className="text-sm text-slate-500 dark:text-zinc-400">Crie suas contas no Google Ads e Meta Ads (gratis) — voce so paga quando ativar anuncios</p>
             </div>
           </div>
           <div className="ml-[52px] space-y-4">
             {/* Google Ads account setup */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
               <button onClick={() => toggleSection("google-ads-setup")} className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100">
@@ -483,7 +483,7 @@ function DashboardInner() {
                   </div>
                   <span className="text-sm font-semibold text-slate-800">Criar conta no Google Ads</span>
                 </div>
-                {expandedSections["google-ads-setup"] ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+                {expandedSections["google-ads-setup"] ? <ChevronUp className="h-4 w-4 text-slate-400 dark:text-zinc-500" /> : <ChevronDown className="h-4 w-4 text-slate-400 dark:text-zinc-500" />}
               </button>
               {expandedSections["google-ads-setup"] && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-3 space-y-2">
@@ -495,15 +495,15 @@ function DashboardInner() {
                     "Clique em \"Enviar\" — sua conta esta criada!",
                     "Va em Ferramentas > Faturamento e adicione um cartao de credito",
                   ].map((step, i) => (
-                    <label key={i} className="flex items-start gap-3 cursor-pointer rounded-lg px-3 py-2 hover:bg-slate-50 transition-colors">
+                    <label key={i} className="flex items-start gap-3 cursor-pointer rounded-lg px-3 py-2 hover:bg-slate-50 dark:bg-zinc-800/50 transition-colors">
                       <input
                         type="checkbox"
                         checked={!!completedSteps[`gads-${i}`]}
                         onChange={() => toggleStep(`gads-${i}`)}
                         className="mt-0.5 h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
                       />
-                      <span className={cn("text-sm text-slate-700 leading-relaxed", completedSteps[`gads-${i}`] && "line-through text-slate-400")}>
-                        <strong className="text-slate-600">{i + 1}.</strong> {step}
+                      <span className={cn("text-sm text-slate-700 leading-relaxed", completedSteps[`gads-${i}`] && "line-through text-slate-400 dark:text-zinc-500")}>
+                        <strong className="text-slate-600 dark:text-zinc-300">{i + 1}.</strong> {step}
                       </span>
                     </label>
                   ))}
@@ -517,7 +517,7 @@ function DashboardInner() {
             </div>
 
             {/* Meta Ads account setup */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
               <button onClick={() => toggleSection("meta-ads-setup")} className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100">
@@ -525,7 +525,7 @@ function DashboardInner() {
                   </div>
                   <span className="text-sm font-semibold text-slate-800">Criar conta no Meta Ads (Facebook/Instagram)</span>
                 </div>
-                {expandedSections["meta-ads-setup"] ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+                {expandedSections["meta-ads-setup"] ? <ChevronUp className="h-4 w-4 text-slate-400 dark:text-zinc-500" /> : <ChevronDown className="h-4 w-4 text-slate-400 dark:text-zinc-500" />}
               </button>
               {expandedSections["meta-ads-setup"] && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-3 space-y-2">
@@ -539,15 +539,15 @@ function DashboardInner() {
                     "Va em Faturamento e adicione um cartao de credito",
                     "Instale o Meta Pixel no seu site (em Fontes de dados > Pixels)",
                   ].map((step, i) => (
-                    <label key={i} className="flex items-start gap-3 cursor-pointer rounded-lg px-3 py-2 hover:bg-slate-50 transition-colors">
+                    <label key={i} className="flex items-start gap-3 cursor-pointer rounded-lg px-3 py-2 hover:bg-slate-50 dark:bg-zinc-800/50 transition-colors">
                       <input
                         type="checkbox"
                         checked={!!completedSteps[`meta-${i}`]}
                         onChange={() => toggleStep(`meta-${i}`)}
                         className="mt-0.5 h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
                       />
-                      <span className={cn("text-sm text-slate-700 leading-relaxed", completedSteps[`meta-${i}`] && "line-through text-slate-400")}>
-                        <strong className="text-slate-600">{i + 1}.</strong> {step}
+                      <span className={cn("text-sm text-slate-700 leading-relaxed", completedSteps[`meta-${i}`] && "line-through text-slate-400 dark:text-zinc-500")}>
+                        <strong className="text-slate-600 dark:text-zinc-300">{i + 1}.</strong> {step}
                       </span>
                     </label>
                   ))}
@@ -569,8 +569,8 @@ function DashboardInner() {
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-sm font-bold text-white">3</div>
             <div>
-              <h3 className="text-base font-semibold text-slate-900">Criar seu anuncio no Google Ads</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100">Criar seu anuncio no Google Ads</h3>
+              <p className="text-sm text-slate-500 dark:text-zinc-400">
                 {aiPlan?.googleAds?.recommendedMonthlyBudget
                   ? `Orcamento recomendado: ${aiPlan.googleAds.recommendedMonthlyBudget} | Diario: ${aiPlan.googleAds.recommendedDailyBudget || "R$30"}`
                   : aiPlan?.adStrategy?.recommendedBudget
@@ -602,7 +602,7 @@ function DashboardInner() {
                 { title: "REVISE e PUBLIQUE", detail: `Verifique o preview no lado direito. Titulos OK? Descricoes? URL? Se tudo certo, clique em "Publicar campanha". Aprovacao leva de 1 a 24 horas.` },
               ] as Array<{ title: string; detail: string; copyData?: string }>
               return (
-                <div key={campIdx} className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                <div key={campIdx} className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
                   {/* Campaign header */}
                   <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-slate-100">
                     <div className="flex items-center justify-between">
@@ -612,7 +612,7 @@ function DashboardInner() {
                           <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">{gCamp.objective}</span>
                           {gCamp.locations && <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">{gCamp.locations}</span>}
                           {gCamp.estimatedCPC && <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-medium text-purple-700">CPC: {gCamp.estimatedCPC}</span>}
-                          {gCamp.schedule && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">{gCamp.schedule}</span>}
+                          {gCamp.schedule && <span className="rounded-full bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:text-zinc-300">{gCamp.schedule}</span>}
                         </div>
                       </div>
                       <button onClick={() => toggleSection(`camp-${campIdx}`)} className="shrink-0 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-xs font-semibold text-white shadow hover:brightness-110 transition-all">
@@ -636,11 +636,11 @@ function DashboardInner() {
                                 <span className={cn("text-sm font-bold text-slate-800", completedSteps[`camp-${campIdx}-step-${i}`] && "line-through")}>
                                   Passo {i + 1}: {step.title}
                                 </span>
-                                <p className="text-xs text-slate-500 leading-relaxed mt-0.5">{step.detail}</p>
+                                <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed mt-0.5">{step.detail}</p>
                               </div>
                             </label>
                             {step.copyData && (
-                              <div className="ml-9 mb-2 rounded-lg bg-slate-50 border border-slate-200 p-3">
+                              <div className="ml-9 mb-2 rounded-lg bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 p-3">
                                 <pre className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed font-mono">{step.copyData}</pre>
                                 <button onClick={() => copyText(step.copyData!, `step-${campIdx}-${i}`)} className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-violet-700 transition-colors">
                                   <Copy className="h-3 w-3" /> {copiedText === `step-${campIdx}-${i}` ? "Copiado! Cole no Google Ads" : "Copiar"}
@@ -697,8 +697,8 @@ function DashboardInner() {
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-sm font-bold text-white">3B</div>
               <div>
-                <h3 className="text-base font-semibold text-slate-900">Criar anuncio no Instagram / Facebook</h3>
-                <p className="text-sm text-slate-500">Orcamento: {aiPlan.metaAds?.recommendedMonthlyBudget || aiPlan.metaAds?.recommendedDailyBudget || "R$20-50/dia"}</p>
+                <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100">Criar anuncio no Instagram / Facebook</h3>
+                <p className="text-sm text-slate-500 dark:text-zinc-400">Orcamento: {aiPlan.metaAds?.recommendedMonthlyBudget || aiPlan.metaAds?.recommendedDailyBudget || "R$20-50/dia"}</p>
               </div>
             </div>
             <div className="ml-[52px] space-y-4">
@@ -729,7 +729,7 @@ function DashboardInner() {
                 ]
 
                 return (
-                  <div key={campIdx} className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                  <div key={campIdx} className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
                     <div className="px-4 py-3 bg-gradient-to-r from-pink-50 to-purple-50 border-b border-slate-100">
                       <div className="flex items-center justify-between">
                         <h4 className="text-sm font-bold text-slate-800">{mCamp.name} <span className="rounded-full bg-pink-100 px-2 py-0.5 text-[10px] font-medium text-pink-700 ml-2">{mCamp.objective}</span></h4>
@@ -746,11 +746,11 @@ function DashboardInner() {
                               <input type="checkbox" checked={!!completedSteps[`meta-${campIdx}-step-${i}`]} onChange={() => toggleStep(`meta-${campIdx}-step-${i}`)} className="mt-1 h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-500 shrink-0" />
                               <div className={cn("flex-1", completedSteps[`meta-${campIdx}-step-${i}`] && "opacity-40")}>
                                 <span className={cn("text-sm font-bold text-slate-800", completedSteps[`meta-${campIdx}-step-${i}`] && "line-through")}>Passo {i + 1}: {step.title}</span>
-                                <p className="text-xs text-slate-500 leading-relaxed mt-0.5">{step.detail}</p>
+                                <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed mt-0.5">{step.detail}</p>
                               </div>
                             </label>
                             {step.copyData && (
-                              <div className="ml-9 mb-2 rounded-lg bg-slate-50 border border-slate-200 p-3">
+                              <div className="ml-9 mb-2 rounded-lg bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 p-3">
                                 <pre className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed font-mono">{step.copyData}</pre>
                                 <button onClick={() => copyText(step.copyData!, `meta-step-${campIdx}-${i}`)} className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-pink-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-pink-700 transition-colors">
                                   <Copy className="h-3 w-3" /> {copiedText === `meta-step-${campIdx}-${i}` ? "Copiado! Cole no Meta Ads" : "Copiar"}
@@ -785,8 +785,8 @@ function DashboardInner() {
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-sm font-bold text-white">3C</div>
                 <div>
-                  <h3 className="text-base font-semibold text-slate-900">Criar anuncio no TikTok</h3>
-                  <p className="text-sm text-slate-500">{tiktokData.whyTikTok || "Alcance um publico engajado com videos curtos"}</p>
+                  <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100">Criar anuncio no TikTok</h3>
+                  <p className="text-sm text-slate-500 dark:text-zinc-400">{tiktokData.whyTikTok || "Alcance um publico engajado com videos curtos"}</p>
                 </div>
               </div>
               <div className="ml-[52px] space-y-4">
@@ -817,11 +817,11 @@ function DashboardInner() {
                   ]
 
                   return (
-                    <div key={campIdx} className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                    <div key={campIdx} className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
                       <div className="px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-800">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-sm font-bold text-white">{camp.name} <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white ml-2">{camp.objective}</span></h4>
-                          <button onClick={() => toggleSection(`tiktok-${campIdx}`)} className="shrink-0 rounded-lg bg-white px-4 py-2 text-xs font-semibold text-slate-900 shadow hover:bg-slate-50 transition-all">
+                          <h4 className="text-sm font-bold text-white">{camp.name} <span className="rounded-full bg-white dark:bg-zinc-900/20 px-2 py-0.5 text-[10px] font-medium text-white ml-2">{camp.objective}</span></h4>
+                          <button onClick={() => toggleSection(`tiktok-${campIdx}`)} className="shrink-0 rounded-lg bg-white dark:bg-zinc-900 px-4 py-2 text-xs font-semibold text-slate-900 dark:text-zinc-100 shadow hover:bg-slate-50 dark:bg-zinc-800/50 transition-all">
                             {isExpanded ? "Fechar tutorial" : "Comecar tutorial"}
                           </button>
                         </div>
@@ -830,15 +830,15 @@ function DashboardInner() {
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 space-y-1">
                           {tiktokSteps.map((step, i) => (
                             <div key={i} className="rounded-lg border-l-2 border-transparent hover:border-slate-400 transition-colors">
-                              <label className="flex items-start gap-2.5 cursor-pointer px-2.5 py-2.5 hover:bg-slate-50">
+                              <label className="flex items-start gap-2.5 cursor-pointer px-2.5 py-2.5 hover:bg-slate-50 dark:bg-zinc-800/50">
                                 <input type="checkbox" checked={!!completedSteps[`tiktok-${campIdx}-step-${i}`]} onChange={() => toggleStep(`tiktok-${campIdx}-step-${i}`)} className="mt-1 h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-500 shrink-0" />
                                 <div className={cn("flex-1", completedSteps[`tiktok-${campIdx}-step-${i}`] && "opacity-40")}>
                                   <span className={cn("text-sm font-bold text-slate-800", completedSteps[`tiktok-${campIdx}-step-${i}`] && "line-through")}>Passo {i + 1}: {step.title}</span>
-                                  <p className="text-xs text-slate-500 leading-relaxed mt-0.5">{step.detail}</p>
+                                  <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed mt-0.5">{step.detail}</p>
                                 </div>
                               </label>
                               {step.copyData && (
-                                <div className="ml-9 mb-2 rounded-lg bg-slate-50 border border-slate-200 p-3">
+                                <div className="ml-9 mb-2 rounded-lg bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 p-3">
                                   <pre className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed font-mono">{step.copyData}</pre>
                                   <button onClick={() => copyText(step.copyData!, `tiktok-step-${campIdx}-${i}`)} className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-slate-800 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-slate-900 transition-colors">
                                     <Copy className="h-3 w-3" /> {copiedText === `tiktok-step-${campIdx}-${i}` ? "Copiado!" : "Copiar"}
@@ -869,8 +869,8 @@ function DashboardInner() {
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-sm font-bold text-white">4</div>
             <div>
-              <h3 className="text-base font-semibold text-slate-900">Palavras-chave para seus anuncios</h3>
-              <p className="text-sm text-slate-500">Use essas palavras na sua campanha do Google Ads — elas sao o que seus clientes digitam no Google</p>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100">Palavras-chave para seus anuncios</h3>
+              <p className="text-sm text-slate-500 dark:text-zinc-400">Use essas palavras na sua campanha do Google Ads — elas sao o que seus clientes digitam no Google</p>
             </div>
           </div>
           <div className="ml-[52px] space-y-4">
@@ -881,14 +881,14 @@ function DashboardInner() {
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700">Alta intencao de compra</span>
-                      <span className="text-xs text-slate-400">— Pessoas prontas para comprar</span>
+                      <span className="text-xs text-slate-400 dark:text-zinc-500">— Pessoas prontas para comprar</span>
                     </div>
                     <div className="space-y-1.5">
                       {buyKeywords.map((kw, i) => (
                         <div key={i} className="flex items-center justify-between gap-3 rounded-lg border border-red-100 bg-red-50/30 px-4 py-2.5">
                           <div className="flex-1 min-w-0">
                             <span className="text-sm font-medium text-slate-700">{kw.keyword}</span>
-                            <p className="text-xs text-slate-500">{kw.reason}</p>
+                            <p className="text-xs text-slate-500 dark:text-zinc-400">{kw.reason}</p>
                           </div>
                           <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0",
                             kw.difficulty === "facil" ? "bg-green-100 text-green-700" : kw.difficulty === "medio" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
@@ -904,14 +904,14 @@ function DashboardInner() {
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-700">Informacionais</span>
-                      <span className="text-xs text-slate-400">— Pessoas pesquisando antes de comprar</span>
+                      <span className="text-xs text-slate-400 dark:text-zinc-500">— Pessoas pesquisando antes de comprar</span>
                     </div>
                     <div className="space-y-1.5">
                       {infoKeywords.map((kw, i) => (
                         <div key={i} className="flex items-center justify-between gap-3 rounded-lg border border-blue-100 bg-blue-50/30 px-4 py-2.5">
                           <div className="flex-1 min-w-0">
                             <span className="text-sm font-medium text-slate-700">{kw.keyword}</span>
-                            <p className="text-xs text-slate-500">{kw.reason}</p>
+                            <p className="text-xs text-slate-500 dark:text-zinc-400">{kw.reason}</p>
                           </div>
                           <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0",
                             kw.difficulty === "facil" ? "bg-green-100 text-green-700" : kw.difficulty === "medio" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
@@ -952,21 +952,21 @@ function DashboardInner() {
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-sm font-bold text-white">5</div>
             <div>
-              <h3 className="text-base font-semibold text-slate-900">Monitorar e melhorar</h3>
-              <p className="text-sm text-slate-500">Depois de ativar seus anuncios, acompanhe os resultados e otimize</p>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100">Monitorar e melhorar</h3>
+              <p className="text-sm text-slate-500 dark:text-zinc-400">Depois de ativar seus anuncios, acompanhe os resultados e otimize</p>
             </div>
           </div>
           <div className="ml-[52px] space-y-3">
             {/* Daily checklist */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
               <button onClick={() => toggleSection("monitor-daily")} className="flex w-full items-center justify-between">
                 <span className="flex items-center gap-2 text-sm font-semibold text-slate-800">
                   <Eye className="h-4 w-4 text-purple-500" /> O que verificar todo dia
                 </span>
-                {expandedSections["monitor-daily"] ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+                {expandedSections["monitor-daily"] ? <ChevronUp className="h-4 w-4 text-slate-400 dark:text-zinc-500" /> : <ChevronDown className="h-4 w-4 text-slate-400 dark:text-zinc-500" />}
               </button>
               {expandedSections["monitor-daily"] && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 space-y-2 text-sm text-slate-600">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 space-y-2 text-sm text-slate-600 dark:text-zinc-300">
                   <div className="rounded-lg bg-purple-50 px-3 py-2">
                     <strong>Diariamente (2 min):</strong> Verifique se os anuncios estao rodando e quanto gastou
                   </div>
@@ -981,15 +981,15 @@ function DashboardInner() {
             </div>
 
             {/* When to pause */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
               <button onClick={() => toggleSection("monitor-pause")} className="flex w-full items-center justify-between">
                 <span className="flex items-center gap-2 text-sm font-semibold text-slate-800">
                   <AlertTriangle className="h-4 w-4 text-amber-500" /> Quando pausar uma campanha
                 </span>
-                {expandedSections["monitor-pause"] ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+                {expandedSections["monitor-pause"] ? <ChevronUp className="h-4 w-4 text-slate-400 dark:text-zinc-500" /> : <ChevronDown className="h-4 w-4 text-slate-400 dark:text-zinc-500" />}
               </button>
               {expandedSections["monitor-pause"] && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 space-y-2 text-sm text-slate-600">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 space-y-2 text-sm text-slate-600 dark:text-zinc-300">
                   <div className="rounded-lg bg-amber-50 px-3 py-2">Custo por cliente (CPA) esta maior que o lucro por venda</div>
                   <div className="rounded-lg bg-amber-50 px-3 py-2">Taxa de cliques (CTR) abaixo de 1% apos 7 dias</div>
                   <div className="rounded-lg bg-amber-50 px-3 py-2">Muitos cliques mas zero conversoes apos 100+ cliques</div>
@@ -999,15 +999,15 @@ function DashboardInner() {
             </div>
 
             {/* When to scale */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
               <button onClick={() => toggleSection("monitor-scale")} className="flex w-full items-center justify-between">
                 <span className="flex items-center gap-2 text-sm font-semibold text-slate-800">
                   <TrendingUp className="h-4 w-4 text-green-500" /> Quando aumentar o orcamento
                 </span>
-                {expandedSections["monitor-scale"] ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+                {expandedSections["monitor-scale"] ? <ChevronUp className="h-4 w-4 text-slate-400 dark:text-zinc-500" /> : <ChevronDown className="h-4 w-4 text-slate-400 dark:text-zinc-500" />}
               </button>
               {expandedSections["monitor-scale"] && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 space-y-2 text-sm text-slate-600">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 space-y-2 text-sm text-slate-600 dark:text-zinc-300">
                   <div className="rounded-lg bg-green-50 px-3 py-2">ROAS (retorno) acima de 3x — para cada R$1 gasto, ganha R$3+</div>
                   <div className="rounded-lg bg-green-50 px-3 py-2">CPA estavel por mais de 2 semanas</div>
                   <div className="rounded-lg bg-green-50 px-3 py-2">Taxa de conversao acima de 3%</div>
@@ -1036,8 +1036,8 @@ function DashboardInner() {
       {/* ===================== BOTTOM: Auxiliary Tools ===================== */}
       <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.75 }}>
         <div className="mb-3">
-          <h3 className="text-base font-semibold text-slate-900">Ferramentas auxiliares</h3>
-          <p className="text-sm text-slate-500">Acesso rapido para complementar sua estrategia de anuncios</p>
+          <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-100">Ferramentas auxiliares</h3>
+          <p className="text-sm text-slate-500 dark:text-zinc-400">Acesso rapido para complementar sua estrategia de anuncios</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Link href="/conteudo" className="block">
@@ -1048,7 +1048,7 @@ function DashboardInner() {
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-slate-800">Conteudo</h4>
-                  <p className="text-xs text-slate-500">Criar artigos e posts para crescimento organico</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">Criar artigos e posts para crescimento organico</p>
                 </div>
               </div>
             </GlassCard>
@@ -1062,7 +1062,7 @@ function DashboardInner() {
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-slate-800">SEO</h4>
-                  <p className="text-xs text-slate-500">Monitorar keywords no organico</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">Monitorar keywords no organico</p>
                 </div>
               </div>
             </GlassCard>
@@ -1076,7 +1076,7 @@ function DashboardInner() {
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-slate-800">Concorrentes</h4>
-                  <p className="text-xs text-slate-500">Espionar o que seus concorrentes fazem</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">Espionar o que seus concorrentes fazem</p>
                 </div>
               </div>
             </GlassCard>
@@ -1090,7 +1090,7 @@ function DashboardInner() {
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-slate-800">Co-Piloto IA</h4>
-                  <p className="text-xs text-slate-500">Tirar duvidas sobre marketing e anuncios</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">Tirar duvidas sobre marketing e anuncios</p>
                 </div>
               </div>
             </GlassCard>
@@ -1264,7 +1264,7 @@ function AuditItem({ issue, siteUrl }: { issue: AuditIssue; siteUrl: string }) {
   const borderColor = issue.severity === "ok" ? "border-green-200 bg-green-50/50"
     : issue.severity === "critical" || issue.severity === "high" ? "border-red-200 bg-red-50/50"
     : issue.severity === "medium" ? "border-amber-200 bg-amber-50/50"
-    : "border-slate-100 bg-slate-50/50"
+    : "border-slate-100 bg-slate-50 dark:bg-zinc-800/50/50"
 
   return (
     <div className={cn("rounded-xl border px-4 py-3 transition-all", borderColor)}>
@@ -1275,7 +1275,7 @@ function AuditItem({ issue, siteUrl }: { issue: AuditIssue; siteUrl: string }) {
             : <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />}
           <div className="min-w-0">
             <span className="text-sm text-slate-700 font-medium">{issue.title}</span>
-            <p className="text-xs text-slate-500 truncate">{issue.description}</p>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 truncate">{issue.description}</p>
           </div>
         </div>
         {fix && (
@@ -1293,10 +1293,10 @@ function AuditItem({ issue, siteUrl }: { issue: AuditIssue; siteUrl: string }) {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
-          className="mt-3 border-t border-slate-200 pt-3"
+          className="mt-3 border-t border-slate-200 dark:border-zinc-800 pt-3"
         >
           <p className="text-xs font-semibold text-slate-700 mb-2">Passo a passo para corrigir:</p>
-          <ol className="space-y-1.5 text-xs text-slate-600 list-decimal list-inside">
+          <ol className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-300 list-decimal list-inside">
             {fix.steps.map((step, i) => (
               <li key={i} className="leading-relaxed">{step}</li>
             ))}
@@ -1322,7 +1322,7 @@ function AdReadinessItem({ check, siteUrl }: { check: { label: string; descripti
   const borderColor = check.status === "ok" ? "border-green-200 bg-green-50/50"
     : check.status === "error" ? "border-red-200 bg-red-50/50"
     : check.status === "warning" ? "border-amber-200 bg-amber-50/50"
-    : "border-slate-100 bg-slate-50/50"
+    : "border-slate-100 bg-slate-50 dark:bg-zinc-800/50/50"
 
   return (
     <div className={cn("rounded-xl border px-4 py-3 transition-all", borderColor)}>
@@ -1334,7 +1334,7 @@ function AdReadinessItem({ check, siteUrl }: { check: { label: string; descripti
             : <Circle className="h-5 w-5 text-slate-300 shrink-0" />}
           <div className="min-w-0">
             <span className="text-sm text-slate-700 font-medium">{check.label}</span>
-            <p className="text-xs text-slate-500">{check.description}</p>
+            <p className="text-xs text-slate-500 dark:text-zinc-400">{check.description}</p>
           </div>
         </div>
         {fix && (
@@ -1351,10 +1351,10 @@ function AdReadinessItem({ check, siteUrl }: { check: { label: string; descripti
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="mt-3 border-t border-slate-200 pt-3"
+          className="mt-3 border-t border-slate-200 dark:border-zinc-800 pt-3"
         >
           <p className="text-xs font-semibold text-slate-700 mb-2">Passo a passo:</p>
-          <ol className="space-y-1.5 text-xs text-slate-600 list-decimal list-inside">
+          <ol className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-300 list-decimal list-inside">
             {fix.steps.map((step, i) => (
               <li key={i} className="leading-relaxed">{step}</li>
             ))}
@@ -1376,7 +1376,7 @@ function AdReadinessItem({ check, siteUrl }: { check: { label: string; descripti
 function QuickWinItem({ quickWin, siteUrl }: { quickWin: { action: string; impact: string; timeToComplete: string; howTo: string }; siteUrl: string }) {
   const [expanded, setExpanded] = useState(false)
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3">
+    <div className="rounded-xl border border-slate-100 bg-slate-50 dark:bg-zinc-800/50/50 px-4 py-3">
       <div className="flex items-center justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -1385,15 +1385,15 @@ function QuickWinItem({ quickWin, siteUrl }: { quickWin: { action: string; impac
               {quickWin.impact === "alto" ? "Impacto alto" : "Impacto medio"}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">Tempo estimado: {quickWin.timeToComplete}</p>
+          <p className="text-xs text-slate-400 dark:text-zinc-500 mt-0.5">Tempo estimado: {quickWin.timeToComplete}</p>
         </div>
         <button onClick={() => setExpanded(!expanded)} className="shrink-0 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100 transition-colors">
           {expanded ? "Fechar" : "Como fazer"}
         </button>
       </div>
       {expanded && (
-        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-3 border-t border-slate-200 pt-3">
-          <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{quickWin.howTo}</p>
+        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-3 border-t border-slate-200 dark:border-zinc-800 pt-3">
+          <p className="text-sm text-slate-600 dark:text-zinc-300 leading-relaxed whitespace-pre-line">{quickWin.howTo}</p>
           <Link href={`/copilot?msg=${encodeURIComponent(quickWin.action + " - me ajude passo a passo para " + siteUrl)}`} className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-violet-600 hover:text-violet-700">
             <Bot className="h-3.5 w-3.5" /> Pedir ajuda ao Co-Piloto
           </Link>
@@ -1406,9 +1406,9 @@ function QuickWinItem({ quickWin, siteUrl }: { quickWin: { action: string; impac
 // Reusable action link component
 function ActionLink({ icon: Icon, label, buttonLabel, href }: { icon: typeof Shield; label: string; buttonLabel: string; href: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 dark:bg-zinc-800/50/50 px-4 py-3">
       <div className="flex items-center gap-3">
-        <Icon className="h-4 w-4 text-slate-400" />
+        <Icon className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
         <span className="text-sm text-slate-700">{label}</span>
       </div>
       <Link href={href}>

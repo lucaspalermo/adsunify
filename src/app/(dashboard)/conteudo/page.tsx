@@ -49,7 +49,7 @@ interface ActionCard {
   title: string
   description: string
   benefit: string
-  icon: React.ElementType
+  icon: React.ComponentType<{ className?: string }>
   color: string
   bg: string
   glow: string
@@ -381,7 +381,7 @@ function ConteudoPageInner() {
                   card.bg
                 )}
               >
-                <card.icon className={cn("h-5 w-5", card.color)} />
+                <card.icon className={`h-5 w-5 ${card.color}`} />
               </div>
               <h3 className="font-semibold text-slate-900 text-sm">
                 {card.title}

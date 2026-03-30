@@ -18,10 +18,14 @@ import {
   Trash2,
   Users,
   Plus,
+  Bell,
+  Zap,
+  Radar,
 } from "lucide-react"
 import { GlassCard } from "@/components/shared/glass-card"
 import { GradientText } from "@/components/shared/gradient-text"
 import { GlowButton } from "@/components/shared/glow-button"
+import { RadarChartCard } from "@/components/charts/radar-chart"
 import { useUserId } from "@/hooks/use-user-id"
 import { cn } from "@/lib/utils"
 
@@ -65,8 +69,23 @@ const loadingSteps = [
   "Pronto!",
 ]
 
-function CompetitorCard({ comp, onRemove }: { comp: CompetitorEntry; onRemove: (id: string) => void }) {
+interface CounterStrategy {
+  summary: string
+  shortTermActions: { action: string; timeline: string; expectedImpact: string }[]
+  longTermActions: { action: string; timeline: string; expectedImpact: string }[]
+  contentIdeas: { title: string; type: string; targetKeyword: string }[]
+  keywordOpportunities: string[]
+  budgetSuggestion: string
+  competitiveAdvantages: string[]
+}
+
+function CompetitorCard({ comp, onRemove, userId }: { comp: CompetitorEntry; onRemove: (id: string) => void; userId: string }) {
   const [expandedCopy, setExpandedCopy] = useState(false)
+  const [radarData, setRadarData] = useState<any[] | null>(null)
+  const [loadingRadar, setLoadingRadar] = useState(false)
+  const [strategy, setStrategy] = useState<CounterStrategy | null>(null)
+  const [loadingStrategy, setLoadingStrategy] = useState(false)
+  const [showStrategy, setShowStrategy] = useState(false)
   const a = comp.analysis
   if (!a) return null
 
@@ -203,19 +222,107 @@ function CompetitorCard({ comp, onRemove }: { comp: CompetitorEntry; onRemove: (
         </div>
 
         {/* How to beat them */}
-        <div className="rounded-xl bg-gradient-to-br from-violet-50 to-blue-50 border border-violet-200/60 p-4">
-          <div className="flex items-center gap-2 text-xs font-semibold text-violet-700 uppercase tracking-wider mb-3">
+        <div className="rounded-xl bg-gradient-to-br from-violet-50 to-blue-50 border border-violet-200/60 p-4 dark:from-violet-950/30 dark:to-blue-950/30 dark:border-violet-800/40">
+          <div className="flex items-center gap-2 text-xs font-semibold text-violet-700 dark:text-violet-400 uppercase tracking-wider mb-3">
             <Swords className="h-3.5 w-3.5" />
             Como superar esse concorrente
           </div>
           <ul className="space-y-2">
             {a.howToBeatThem.map((tip, i) => (
-              <motion.li key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.06 }} className="flex items-start gap-2 text-sm text-slate-700">
+              <motion.li key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.06 }} className="flex items-start gap-2 text-sm text-slate-700 dark:text-zinc-300">
                 <span className="mt-0.5 text-violet-500 font-bold text-xs">{i + 1}.</span>
                 {tip}
               </motion.li>
             ))}
           </ul>
+        </div>
+
+        {/* Radar Chart + Counter-Strategy Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Radar comparison */}
+          <div>
+            {radarData ? (
+              <RadarChartCard data={radarData} title="Voce vs Concorrente" subtitle="Comparacao de metricas" />
+            ) : (
+              <GlassCard className="flex flex-col items-center justify-center p-6 text-center" hover={false}>
+                <Radar className="h-8 w-8 text-slate-300 dark:text-zinc-600 mb-3" />
+                <p className="text-sm text-slate-500 dark:text-zinc-400 mb-3">Compare suas metricas com este concorrente</p>
+                <GlowButton size="sm" onClick={async () => {
+                  setLoadingRadar(true)
+                  try {
+                    const res = await fetch(`/api/competitors/compare?userId=${userId}&competitorId=${comp.id}`)
+                    const data = await res.json()
+                    if (data.user && data.competitor) {
+                      setRadarData([
+                        { subject: "SEO", user: data.user.seo, competitor: data.competitor.seo, fullMark: 100 },
+                        { subject: "Conteudo", user: data.user.content, competitor: data.competitor.content, fullMark: 100 },
+                        { subject: "Velocidade", user: data.user.speed, competitor: data.competitor.speed, fullMark: 100 },
+                        { subject: "Social", user: data.user.social, competitor: data.competitor.social, fullMark: 100 },
+                        { subject: "Backlinks", user: data.user.backlinks, competitor: data.competitor.backlinks, fullMark: 100 },
+                      ])
+                    }
+                  } catch {}
+                  setLoadingRadar(false)
+                }} disabled={loadingRadar}>
+                  {loadingRadar ? <Loader2 className="h-4 w-4 animate-spin" /> : <Radar className="h-4 w-4" />}
+                  Comparar
+                </GlowButton>
+              </GlassCard>
+            )}
+          </div>
+
+          {/* Counter-strategy generator */}
+          <div>
+            {strategy ? (
+              <GlassCard className="p-5 space-y-3" hover={false}>
+                <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                  <Zap className="h-3.5 w-3.5" />
+                  Contra-Estrategia IA
+                </div>
+                <p className="text-sm text-slate-700 dark:text-zinc-300">{strategy.summary}</p>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-2">Acoes imediatas:</p>
+                  {strategy.shortTermActions.slice(0, 3).map((a, i) => (
+                    <div key={i} className="flex items-start gap-2 mb-1.5">
+                      <span className={cn("shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold", a.expectedImpact === "alto" ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600")}>{a.expectedImpact}</span>
+                      <span className="text-xs text-slate-600 dark:text-zinc-300">{a.action} <span className="text-slate-400">({a.timeline})</span></span>
+                    </div>
+                  ))}
+                </div>
+                {strategy.keywordOpportunities.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-1">Keywords para atacar:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {strategy.keywordOpportunities.slice(0, 5).map((kw, i) => (
+                        <span key={i} className="rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 px-2 py-0.5 text-[11px] text-indigo-600 dark:text-indigo-400">{kw}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </GlassCard>
+            ) : (
+              <GlassCard className="flex flex-col items-center justify-center p-6 text-center" hover={false}>
+                <Zap className="h-8 w-8 text-slate-300 dark:text-zinc-600 mb-3" />
+                <p className="text-sm text-slate-500 dark:text-zinc-400 mb-3">Gere uma contra-estrategia personalizada com IA</p>
+                <GlowButton size="sm" onClick={async () => {
+                  setLoadingStrategy(true)
+                  try {
+                    const res = await fetch("/api/competitors/counter-strategy", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ userId, competitorId: comp.id }),
+                    })
+                    const data = await res.json()
+                    if (data.strategy) setStrategy(data.strategy)
+                  } catch {}
+                  setLoadingStrategy(false)
+                }} disabled={loadingStrategy}>
+                  {loadingStrategy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Swords className="h-4 w-4" />}
+                  Gerar Contra-Estrategia
+                </GlowButton>
+              </GlassCard>
+            )}
+          </div>
         </div>
       </GlassCard>
     </motion.div>
@@ -382,7 +489,7 @@ function ConcorrentesContent() {
       ) : (
         <div className="space-y-6">
           {competitors.map((comp) => (
-            <CompetitorCard key={comp.id} comp={comp} onRemove={removeCompetitor} />
+            <CompetitorCard key={comp.id} comp={comp} onRemove={removeCompetitor} userId={userId || ""} />
           ))}
         </div>
       )}
