@@ -1,0 +1,627 @@
+// AdsUnify Marketing Platform - Prisma Schema (SQLite version for local dev/demo)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ──────────────────────────────────────────────
+// Auth Models (NextAuth compatible)
+// ──────────────────────────────────────────────
+
+model User {
+  id                  String    @id @default(cuid())
+  name                String?
+  email               String?   @unique
+  emailVerified       DateTime?
+  image               String?
+  passwordHash        String?
+  businessName        String?
+  businessNiche       String?
+  businessUrl         String?
+  businessDescription String?
+  monthlyBudget       Float?
+  marketingGoals      Json?
+  xp                  Int       @default(0)
+  level               Int       @default(1)
+  levelTitle          String    @default("Explorador")
+  streakDays          Int       @default(0)
+  streakLastDate      DateTime?
+  avatarConfig        Json?
+  plan                String    @default("STARTER")
+  stripeCustomerId    String?   @unique
+  stripeSubId         String?   @unique
+  planExpiresAt       DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  accounts              Account[]
+  sessions              Session[]
+  healthScores          HealthScore[]
+  userMissions          UserMission[]
+  userBadges            UserBadge[]
+  milestoneCompletions  MilestoneCompletion[]
+  contents              Content[]
+  copilotThreads        CopilotThread[]
+  notifications         Notification[]
+  trackedKeywords       TrackedKeyword[]
+  competitors           Competitor[]
+  siteAudits            SiteAudit[]
+  adAccounts            AdAccount[]
+  funnels               Funnel[]
+  communityPosts        CommunityPost[]
+  communityComments     CommunityComment[]
+  communityLikes        CommunityLike[]
+  reports               Report[]
+  agencyClients         AgencyClient[]     @relation("AgencyOwner")
+  agencyOf              AgencyClient?      @relation("AgencyClientUser")
+  proposals             Proposal[]
+  marketplaceServices   MarketplaceService[]
+  marketplaceOrders     MarketplaceOrder[] @relation("OrderBuyer")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ──────────────────────────────────────────────
+// Health Score
+// ──────────────────────────────────────────────
+
+model HealthScore {
+  id           String   @id @default(cuid())
+  userId       String
+  overallScore Int
+  seoScore     Int?
+  adsScore     Int?
+  contentScore Int?
+  speedScore   Int?
+  socialScore  Int?
+  breakdown    Json?
+  calculatedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, calculatedAt])
+}
+
+// ──────────────────────────────────────────────
+// Gamification: Missions
+// ──────────────────────────────────────────────
+
+model Mission {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  type        String
+  category    String
+  xpReward    Int
+  difficulty  String
+  criteria    Json?
+  isTemplate  Boolean @default(true)
+
+  userMissions UserMission[]
+}
+
+model UserMission {
+  id          String    @id @default(cuid())
+  userId      String
+  missionId   String
+  status      String    @default("ACTIVE")
+  progress    Float     @default(0)
+  assignedAt  DateTime  @default(now())
+  completedAt DateTime?
+  expiresAt   DateTime?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, assignedAt])
+}
+
+// ──────────────────────────────────────────────
+// Gamification: Badges
+// ──────────────────────────────────────────────
+
+model Badge {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  description String
+  icon        String?
+  rarity      String
+  criteria    Json?
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+}
+
+// ──────────────────────────────────────────────
+// Gamification: Journey Milestones
+// ──────────────────────────────────────────────
+
+model JourneyMilestone {
+  id           String  @id @default(cuid())
+  slug         String  @unique
+  title        String
+  description  String
+  order        Int
+  levelTitle   String?
+  xpRequired   Int
+  icon         String?
+  requirements Json?
+  rewards      Json?
+
+  completions MilestoneCompletion[]
+}
+
+model MilestoneCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  milestoneId String
+  completedAt DateTime @default(now())
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  milestone JourneyMilestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, milestoneId])
+}
+
+// ──────────────────────────────────────────────
+// Content
+// ──────────────────────────────────────────────
+
+model Content {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String
+  title       String
+  body        String
+  metadata    Json?
+  status      String    @default("DRAFT")
+  aiPrompt    String?
+  aiModel     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type, status])
+}
+
+// ──────────────────────────────────────────────
+// AI Copilot
+// ──────────────────────────────────────────────
+
+model CopilotThread {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages CopilotMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model CopilotMessage {
+  id        String   @id @default(cuid())
+  threadId  String
+  role      String
+  content   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  thread CopilotThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+}
+
+// ──────────────────────────────────────────────
+// Notifications
+// ──────────────────────────────────────────────
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String
+  title       String
+  body        String?
+  actionUrl   String?
+  actionLabel String?
+  isRead      Boolean  @default(false)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+}
+
+// ──────────────────────────────────────────────
+// SEO: Keywords & Tracking
+// ──────────────────────────────────────────────
+
+model TrackedKeyword {
+  id        String   @id @default(cuid())
+  userId    String
+  keyword   String
+  location  String   @default("BR")
+  createdAt DateTime @default(now())
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rankings KeywordRanking[]
+
+  @@unique([userId, keyword, location])
+  @@index([userId])
+}
+
+model KeywordRanking {
+  id        String   @id @default(cuid())
+  keywordId String
+  position  Int?
+  url       String?
+  volume    Int?
+  difficulty Float?
+  checkedAt DateTime @default(now())
+
+  keyword TrackedKeyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  @@index([keywordId, checkedAt])
+}
+
+model SiteAudit {
+  id          String   @id @default(cuid())
+  userId      String
+  url         String
+  score       Int?
+  issues      Json?
+  performance Json?
+  seo         Json?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+// ──────────────────────────────────────────────
+// Competitors
+// ──────────────────────────────────────────────
+
+model Competitor {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  domain    String
+  createdAt DateTime @default(now())
+
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshots CompetitorSnapshot[]
+  alerts    CompetitorAlert[]
+
+  @@unique([userId, domain])
+  @@index([userId])
+}
+
+model CompetitorSnapshot {
+  id           String     @id @default(cuid())
+  competitorId String
+  domainAuth   Int?
+  backlinks    Int?
+  organicKw    Int?
+  traffic      Int?
+  topKeywords  Json?
+  techStack    Json?
+  snapshotAt   DateTime   @default(now())
+
+  competitor Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+
+  @@index([competitorId, snapshotAt])
+}
+
+model CompetitorAlert {
+  id           String     @id @default(cuid())
+  competitorId String
+  type         String
+  title        String
+  details      Json?
+  isRead       Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+
+  competitor Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+
+  @@index([competitorId, createdAt])
+}
+
+// ──────────────────────────────────────────────
+// Ads Integration
+// ──────────────────────────────────────────────
+
+model AdAccount {
+  id           String    @id @default(cuid())
+  userId       String
+  platform     String
+  accountId    String
+  accountName  String?
+  accessToken  String?
+  refreshToken String?
+  isActive     Boolean   @default(true)
+  lastSync     DateTime?
+  createdAt    DateTime  @default(now())
+
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns AdCampaignSnapshot[]
+
+  @@unique([userId, platform, accountId])
+  @@index([userId])
+}
+
+model AdCampaignSnapshot {
+  id           String    @id @default(cuid())
+  adAccountId  String
+  campaignId   String
+  campaignName String
+  status       String
+  spend        Float     @default(0)
+  impressions  Int       @default(0)
+  clicks       Int       @default(0)
+  conversions  Int       @default(0)
+  cpc          Float?
+  cpa          Float?
+  ctr          Float?
+  roas         Float?
+  snapshotAt   DateTime  @default(now())
+
+  adAccount AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
+
+  @@index([adAccountId, snapshotAt])
+}
+
+// ──────────────────────────────────────────────
+// Funnel Builder
+// ──────────────────────────────────────────────
+
+model Funnel {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  slug         String
+  templateId   String?
+  isPublished  Boolean  @default(false)
+  customDomain String?
+  visits       Int      @default(0)
+  conversions  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pages FunnelPage[]
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
+
+model FunnelPage {
+  id       String @id @default(cuid())
+  funnelId String
+  name     String
+  slug     String
+  order    Int
+  type     String // "landing", "thankyou", "upsell", "checkout"
+  blocks   Json?
+
+  funnel Funnel @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+
+  @@unique([funnelId, slug])
+  @@index([funnelId])
+}
+
+// ──────────────────────────────────────────────
+// Community
+// ──────────────────────────────────────────────
+
+model CommunityPost {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  category  String   // "case_study", "question", "tip", "celebration"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments CommunityComment[]
+  likes    CommunityLike[]
+
+  @@index([category, createdAt])
+  @@index([userId])
+}
+
+model CommunityComment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+model CommunityLike {
+  id     String @id @default(cuid())
+  postId String
+  userId String
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+// ──────────────────────────────────────────────
+// Reports
+// ──────────────────────────────────────────────
+
+model Report {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  period    String   // "2026-03", "2026-Q1"
+  type      String   // "monthly", "quarterly", "custom"
+  data      Json?
+  pdfUrl    String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+// ──────────────────────────────────────────────
+// Agency Mode
+// ──────────────────────────────────────────────
+
+model AgencyClient {
+  id          String   @id @default(cuid())
+  agencyId    String
+  clientId    String   @unique
+  clientName  String
+  clientEmail String?
+  clientUrl   String?
+  notes       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  agency User @relation("AgencyOwner", fields: [agencyId], references: [id], onDelete: Cascade)
+  client User @relation("AgencyClientUser", fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+}
+
+model Proposal {
+  id          String   @id @default(cuid())
+  userId      String
+  clientName  String
+  clientEmail String?
+  title       String
+  content     String
+  services    Json?
+  totalValue  Float?
+  status      String   @default("draft") // "draft", "sent", "accepted", "rejected"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}
+
+// ──────────────────────────────────────────────
+// Marketplace
+// ──────────────────────────────────────────────
+
+model MarketplaceService {
+  id           String   @id @default(cuid())
+  providerId   String
+  title        String
+  description  String
+  category     String
+  priceMin     Float
+  priceMax     Float?
+  currency     String   @default("BRL")
+  deliveryDays Int
+  rating       Float    @default(0)
+  reviewCount  Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  provider User               @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  orders   MarketplaceOrder[]
+
+  @@index([category, isActive])
+  @@index([providerId])
+}
+
+model MarketplaceOrder {
+  id        String   @id @default(cuid())
+  serviceId String
+  buyerId   String
+  status    String   @default("pending") // "pending", "in_progress", "delivered", "completed", "disputed"
+  price     Float
+  details   Json?
+  rating    Int?
+  review    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  service MarketplaceService @relation(fields: [serviceId], references: [id])
+  buyer   User               @relation("OrderBuyer", fields: [buyerId], references: [id])
+
+  @@index([serviceId])
+  @@index([buyerId])
+}
+
+// ──────────────────────────────────────────────
+// Glossary
+// ──────────────────────────────────────────────
+
+model GlossaryTerm {
+  id           String   @id @default(cuid())
+  term         String   @unique
+  slug         String   @unique
+  definition   String
+  analogy      String?
+  videoUrl     String?
+  category     String?
+  relatedTerms Json?
+}

@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #f8f9fc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f1f5;
+  --border-subtle: #e2e8f0;
+  --border-hover: #cbd5e1;
+
+  --gradient-purple: #7c3aed;
+  --gradient-blue: #3b82f6;
+  --gradient-cyan: #06b6d4;
+
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+
+  --text-primary: #1a1a2e;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: rgba(124, 58, 237, 0.15);
+  color: #1a1a2e;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(124, 58, 237, 0.4); }
+* { scrollbar-width: thin; scrollbar-color: rgba(124, 58, 237, 0.2) transparent; }
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue), var(--gradient-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
