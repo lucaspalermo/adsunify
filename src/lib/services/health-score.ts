@@ -137,9 +137,10 @@ function getPriority(impact: number, ease: number): Priority {
 
 export function generateActionPlan(result: HealthScoreResult): ActionItem[] {
   const actions: ActionItem[] = []
+  const bd = result.breakdown || {} as any
 
   // SEO actions based on breakdown
-  if (result.breakdown.ssl.score === 0) {
+  if (bd.ssl?.score === 0) {
     actions.push({
       id: "fix-ssl",
       title: "Instalar certificado SSL (HTTPS)",
@@ -150,7 +151,7 @@ export function generateActionPlan(result: HealthScoreResult): ActionItem[] {
     })
   }
 
-  if (result.breakdown.metaDescription.score === 0) {
+  if (bd.metaDescription?.score === 0) {
     actions.push({
       id: "fix-meta",
       title: "Adicionar Meta Description",
@@ -161,7 +162,7 @@ export function generateActionPlan(result: HealthScoreResult): ActionItem[] {
     })
   }
 
-  if (result.breakdown.sitemap.score === 0) {
+  if (bd.sitemap?.score === 0) {
     actions.push({
       id: "fix-sitemap",
       title: "Criar Sitemap.xml",
@@ -172,7 +173,7 @@ export function generateActionPlan(result: HealthScoreResult): ActionItem[] {
     })
   }
 
-  if (result.breakdown.robotsTxt.score === 0) {
+  if (bd.robotsTxt?.score === 0) {
     actions.push({
       id: "fix-robots",
       title: "Configurar Robots.txt",
@@ -183,7 +184,7 @@ export function generateActionPlan(result: HealthScoreResult): ActionItem[] {
     })
   }
 
-  if (result.breakdown.mobile.score === 0) {
+  if (bd.mobile?.score === 0) {
     actions.push({
       id: "fix-mobile",
       title: "Tornar site responsivo (mobile-friendly)",
