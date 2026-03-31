@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, Suspense } from "react"
-import { motion } from "framer-motion"
 import {
   Megaphone, ArrowRight, ArrowLeft, Copy, Check, Sparkles, Globe, Users,
   Type, Loader2, Wand2, Lightbulb, ExternalLink, Image, Target,
@@ -158,18 +157,18 @@ function AnunciosContent() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 pb-16">
-      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-zinc-100 sm:text-3xl">
           <GradientText as="span">Criar Anuncio</GradientText>
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
           A IA cria o anuncio perfeito e te mostra exatamente onde colar cada coisa
         </p>
-      </motion.div>
+      </div>
 
       {/* ====== STEP 0: Informacoes do negocio ====== */}
       {step === 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <div>
           <GlassCard className="p-6" hover={false}>
             <h2 className="text-base font-bold text-slate-900 dark:text-zinc-100 mb-1">Me conta sobre seu negocio</h2>
             <p className="text-xs text-slate-500 dark:text-zinc-400 mb-5">Preencha o que puder — a IA usa essas informacoes pra criar o melhor anuncio possivel.</p>
@@ -204,12 +203,12 @@ function AnunciosContent() {
               </GlowButton>
             </div>
           </GlassCard>
-        </motion.div>
+        </div>
       )}
 
       {/* ====== STEP 1: Escolher plataforma ====== */}
       {step === 1 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <div>
           <GlassCard className="p-6" hover={false}>
             <h2 className="text-base font-bold text-slate-900 dark:text-zinc-100 mb-1">Onde voce quer anunciar?</h2>
             <p className="text-xs text-slate-500 dark:text-zinc-400 mb-5">
@@ -252,12 +251,12 @@ function AnunciosContent() {
               </GlowButton>
             </div>
           </GlassCard>
-        </motion.div>
+        </div>
       )}
 
       {/* ====== STEP 2: Gerando ====== */}
       {step === 2 && generating && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center py-16">
+        <div className="flex flex-col items-center py-16">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 mb-6">
             <Sparkles className="h-8 w-8 text-white" />
           </div>
@@ -272,12 +271,12 @@ function AnunciosContent() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* ====== STEP 3: Resultado completo ====== */}
       {step === 3 && result && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+        <div className="space-y-5">
 
           {/* Titulos */}
           <GlassCard className="p-5" hover={false}>
@@ -404,7 +403,7 @@ function AnunciosContent() {
               Criar outro anuncio
             </button>
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   )
