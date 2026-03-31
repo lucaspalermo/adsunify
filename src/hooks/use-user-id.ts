@@ -1,23 +1,19 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useState, useEffect } from "react"
 
 export function useUserId() {
-  const { data: session } = useSession()
-  const [userId, setUserId] = useState<string | null>(null)
+  const { data: session, status } = useSession()
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      setUserId(session.user.id)
-    } else {
-      // Fallback: fetch demo user ID from database
-      fetch("/api/user?userId=demo")
-        .then(r => r.json())
-        .then(data => setUserId(data.id || null))
-        .catch(() => setUserId(null))
-    }
-  }, [session])
+  // Return the user ID from session, or null if not authenticated
+  if (status === "loading") return null
+  if (session?.user?.id) return session.user.id as string
 
-  return userId
+  // Try email-based lookup as fallback
+  if (session?.user?.email) {
+    // This will be resolved on first API call
+    return session.user.email
+  }
+
+  return null
 }

@@ -6,31 +6,20 @@ export async function GET(req: Request) {
   const userId = searchParams.get("userId")
   if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 })
 
-  let user = await db.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true, name: true, email: true, image: true,
-      businessName: true, businessNiche: true, businessUrl: true, businessDescription: true,
-      monthlyBudget: true, marketingGoals: true,
-      xp: true, level: true, levelTitle: true, streakDays: true,
-      plan: true, planExpiresAt: true, avatarConfig: true,
-      createdAt: true,
-    },
-  })
+  const selectFields = {
+    id: true, name: true, email: true, image: true,
+    businessName: true, businessNiche: true, businessUrl: true, businessDescription: true,
+    monthlyBudget: true, marketingGoals: true,
+    xp: true, level: true, levelTitle: true, streakDays: true,
+    plan: true, planExpiresAt: true, avatarConfig: true,
+    createdAt: true,
+  }
 
-  // Fallback to demo user if id not found
-  if (!user) {
-    user = await db.user.findFirst({
-      where: { email: "demo@adsunify.com" },
-      select: {
-        id: true, name: true, email: true, image: true,
-        businessName: true, businessNiche: true, businessUrl: true, businessDescription: true,
-        monthlyBudget: true, marketingGoals: true,
-        xp: true, level: true, levelTitle: true, streakDays: true,
-        plan: true, planExpiresAt: true, avatarConfig: true,
-        createdAt: true,
-      },
-    })
+  // Try by ID first, then by email
+  let user = await db.user.findUnique({ where: { id: userId }, select: selectFields })
+
+  if (!user && userId.includes("@")) {
+    user = await db.user.findUnique({ where: { email: userId }, select: selectFields })
   }
   if (!user) return NextResponse.json({ error: "Usuario nao encontrado" }, { status: 404 })
   return NextResponse.json(user)
