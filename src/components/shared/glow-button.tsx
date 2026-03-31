@@ -1,12 +1,11 @@
 "use client"
 
 import { type ButtonHTMLAttributes, type ReactNode, forwardRef } from "react"
-import { motion } from "framer-motion"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const glowButtonVariants = cva(
-  "relative inline-flex items-center justify-center font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 rounded-xl",
+  "relative inline-flex items-center justify-center font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 rounded-xl active:scale-[0.98] hover:scale-[1.02]",
   {
     variants: {
       variant: {
@@ -24,24 +23,20 @@ const glowButtonVariants = cva(
   }
 )
 
-interface GlowButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children">, VariantProps<typeof glowButtonVariants> {
+interface GlowButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof glowButtonVariants> {
   children: ReactNode
-  className?: string
 }
 
 export const GlowButton = forwardRef<HTMLButtonElement, GlowButtonProps>(
   ({ children, className, variant, size, ...props }, ref) => {
     return (
-      <motion.button
+      <button
         ref={ref}
         className={cn(glowButtonVariants({ variant, size }), className)}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.15 }}
-        {...(props as any)}
+        {...props}
       >
         {children}
-      </motion.button>
+      </button>
     )
   }
 )
